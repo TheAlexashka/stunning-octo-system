@@ -1,0 +1,267 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GameScreen } from './components/GameScreen';
+import { Menu, Intro, Briefing, EndScreen } from './components/SessionScreens';
+import { Newspaper } from './components/Newspaper';
+import { PauseMenu } from './components/PauseMenu';
+import { SaveMenu } from './components/SaveMenu';
+import type { SaveSlotsProps } from './components/SaveSlots';
+import { buildShift, CREATURE_LABELS, type CreatureType } from './game/visitors';
+import { music, type TrackName } from './game/music';
+import { playDoor, playGunshot, playStamp } from './game/sounds';
+import { getAudioSettings, setAudioVolume } from './game/audio';
+import { useGameTimers } from './game/useGameTimers';
+import { newSession, SHIFT_TOTALS, LATEST_SHIFT, shiftLabel, type Scene, type SessionState, type Shift } from './game/session';
+import type { InspectionProgress } from './game/conversation';
+import { deleteSave, readSave, readSaveSlots, writeSave, type ManualSlot, type SaveSlotId } from './game/saves';
+
+const SCENE_MUSIC: Record<Scene, TrackName> = {
+  menu: 'menu', intro: 'letter', briefing: 'letter', newspaper: 'letter',
+  play: 'shift', gameover: 'defeat', victory: 'victory',
+};
+
+export default function App() {
+  const [game, setGame] = useState(() => newSession());
+  const gameRef = useRef(game);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const [savesOpen, setSavesOpen] = useState(false);
+  const [slots, setSlots] = useState(readSaveSlots);
+  const [audioSettings, setAudioSettings] = useState(getAudioSettings);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [loadEpoch, setLoadEpoch] = useState(0);
+  const inspectionReader = useRef<(() => InspectionProgress) | null>(null);
+  const restoreTimers = useRef<Record<string, number> | null>(null);
+  const { schedule, pause: pauseTimers, resume: resumeTimers, clear: clearTimers, remaining } = useGameTimers();
+  const visitors = useMemo(() => buildShift(game.shift), [game.shift]);
+  const current = visitors[game.index];
+
+  // Ref updates are synchronous, so double-clicking never repeats a decision.
+  const updateGame = useCallback((change: Partial<SessionState>) => {
+    const next = { ...gameRef.current, ...change };
+    gameRef.current = next;
+    setGame(next);
+  }, []);
+  const refreshSlots = useCallback(() => setSlots(readSaveSlots()), []);
+  const registerSnapshot = useCallback((reader: (() => InspectionProgress) | null) => { inspectionReader.current = reader; }, []);
+  const enableAudio = useCallback(() => { void music.unlock(); }, []);
+  const changePause = useCallback((value: boolean) => {
+    pausedRef.current = value;
+    if (value) pauseTimers(); else resumeTimers();
+    setPaused(value);
+  }, [pauseTimers, resumeTimers]);
+
+  const autoSave = useCallback((state: SessionState, completed: Shift) => {
+    const result = writeSave('auto', state, completed);
+    refreshSlots();
+    setNotice(result.ok ? `Смена ${completed} завершена · автосохранение записано` : result.message);
+  }, [refreshSlots]);
+
+  const advance = useCallback(() => {
+    const previous = gameRef.current;
+    clearTimers();
+    inspectionReader.current = null;
+    const common = { stamped: null, tool: null, feedback: null, flash: false, showDenyMenu: false, inspections: null, pendingTimers: {} } as const;
+    if (previous.errors >= 3) {
+      updateGame({ ...common, scene: 'gameover', processed: previous.index + 1 });
+    } else if (previous.index + 1 >= SHIFT_TOTALS[previous.shift]) {
+      const history = [...previous.history, { shift: previous.shift, errors: previous.errors, processed: SHIFT_TOTALS[previous.shift] }];
+      if (previous.shift < LATEST_SHIFT) {
+        const next = newSession('newspaper', (previous.shift + 1) as Shift, history);
+        updateGame(next);
+        autoSave(next, previous.shift);
+      } else {
+        // Keep the saved scene ID compatible, but show a shift report, not an ending.
+        const complete: SessionState = { ...previous, ...common, scene: 'victory', processed: SHIFT_TOTALS[previous.shift], history };
+        updateGame(complete);
+        autoSave(complete, previous.shift);
+      }
+    } else {
+      updateGame({ ...common, index: previous.index + 1, processed: previous.index + 1 });
+    }
+  }, [clearTimers, updateGame, autoSave]);
+
+  const fireShot = useCallback(() => {
+    playGunshot();
+    updateGame({ flash: true });
+    schedule(() => updateGame({ flash: false }), 1200, 'flash');
+  }, [updateGame, schedule]);
+
+  useEffect(() => { music.play(SCENE_MUSIC[game.scene]); }, [game.scene]);
+  useEffect(() => { if (game.scene === 'play') playDoor(); }, [game.scene, game.index, game.shift]);
+  useEffect(() => () => music.stop(), []);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !pausedRef.current && !savesOpen) {
+        event.preventDefault(); changePause(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [changePause, savesOpen]);
+  useEffect(() => {
+    const onVisibility = () => { if (document.hidden && gameRef.current.scene === 'play') changePause(true); };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [changePause]);
+
+  // Restore only known event types; no function/code is loaded from storage.
+  useEffect(() => {
+    const tasks = restoreTimers.current;
+    restoreTimers.current = null;
+    if (!tasks || gameRef.current.scene !== 'play') return;
+    if (tasks.shot !== undefined) schedule(fireShot, tasks.shot, 'shot');
+    if (tasks.flash !== undefined) schedule(() => updateGame({ flash: false }), tasks.flash, 'flash');
+    if (tasks.advance !== undefined) schedule(advance, tasks.advance, 'advance');
+  }, [loadEpoch, schedule, fireShot, advance, updateGame]);
+
+  function resetRuntime() {
+    clearTimers(); resumeTimers();
+    pausedRef.current = false;
+    setPaused(false); setSavesOpen(false);
+    restoreTimers.current = null;
+    inspectionReader.current = null;
+    setLoadEpoch((value) => value + 1);
+  }
+  function startNewGame() { resetRuntime(); updateGame(newSession('intro')); }
+  function startAtShift(shift: Shift) {
+    resetRuntime();
+    updateGame(shift === 1 ? newSession('intro') : newSession('newspaper', shift));
+  }
+  function goToMenu() { resetRuntime(); updateGame(newSession()); }
+
+  function capture(): SessionState {
+    const currentState = gameRef.current;
+    return {
+      ...currentState,
+      pendingTimers: remaining(),
+      inspections: currentState.scene === 'play' ? inspectionReader.current?.() ?? currentState.inspections : null,
+    };
+  }
+  function saveSlot(slot: ManualSlot) {
+    const result = writeSave(slot, capture());
+    refreshSlots();
+    return result;
+  }
+  function loadSlot(slot: SaveSlotId) {
+    const record = readSave(slot);
+    if (!record) return { ok: false, message: 'Слот пуст или сохранение повреждено.' };
+    let state = JSON.parse(JSON.stringify(record.state)) as SessionState;
+    // Completed shift reports can continue when another shift becomes available.
+    if (state.scene === 'victory' && state.shift < LATEST_SHIFT) {
+      state = newSession('newspaper', (state.shift + 1) as Shift, state.history);
+    }
+    resetRuntime();
+    restoreTimers.current = state.pendingTimers;
+    updateGame(state);
+    setNotice('Сохранение загружено');
+    return { ok: true, message: 'Сохранение загружено.' };
+  }
+  function removeSlot(slot: SaveSlotId) { const result = deleteSave(slot); refreshSlots(); return result; }
+
+  function handleApprove() {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    const visitor = visitors[state.index];
+    const isHuman = visitor.actualType === 'human';
+    const correct = isHuman && !visitor.hasInvalidDocs;
+    const feedback = !isHuman
+      ? `ОШИБКА: пропущен ${CREATURE_LABELS[visitor.actualType].toLowerCase()}. Начальство недовольно.`
+      : visitor.hasInvalidDocs
+        ? 'ОШИБКА: пропущен человек с несоответствием профессии в рабочей визе.'
+        : 'Верно. Обычный гражданин, документы в порядке.';
+    updateGame({ stamped: 'APPROVED', errors: state.errors + (correct ? 0 : 1), feedback });
+    playStamp(); schedule(advance, 2200, 'advance');
+  }
+  function handleRefuse() {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    const visitor = visitors[state.index];
+    const isHuman = visitor.actualType === 'human';
+    const correct = isHuman && visitor.hasInvalidDocs;
+    const feedback = !isHuman
+      ? `ОШИБКА: нежить ушла от окна вместо вызова тревоги СД. Вид: ${CREATURE_LABELS[visitor.actualType].toLowerCase()}.`
+      : !visitor.hasInvalidDocs
+        ? 'ОШИБКА: необоснованный отказ гражданину с исправными документами.'
+        : 'Верно. Гражданин развёрнут из-за ошибки в рабочей визе.';
+    updateGame({ stamped: 'REFUSED', errors: state.errors + (correct ? 0 : 1), feedback });
+    playStamp(); schedule(advance, 2200, 'advance');
+  }
+  function handleAlarm() {
+    const state = gameRef.current;
+    if (!pausedRef.current && !state.stamped && state.scene === 'play') updateGame({ showDenyMenu: true });
+  }
+  function selectCreature(guess: CreatureType, reasons?: import('./game/alarmReasons').AlarmEvidenceId[]) {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    const visitor = visitors[state.index];
+    const mistakeType = visitor.actualType === 'human' || guess !== visitor.actualType;
+    const requireReasons = state.shift >= 5;
+    const missingReasons = requireReasons && (!reasons || reasons.length === 0);
+    const mistake = mistakeType || missingReasons;
+
+    let text = '';
+    if (visitor.actualType === 'human') {
+      text = 'ОШИБКА: казнён невиновный человек. Кровь на ваших руках.';
+    } else if (guess !== visitor.actualType) {
+      text = `Ошибка классификации. Это был ${CREATURE_LABELS[visitor.actualType].toLowerCase()}.`;
+    } else if (missingReasons) {
+      text = 'ОШИБКА: с пятой ночи вызов СД без подтверждённых улик наказывается трибуналом!';
+    } else {
+      text = `Точно. Угроза устранена. Вид: ${CREATURE_LABELS[visitor.actualType].toLowerCase()}.`;
+    }
+
+    updateGame({ showDenyMenu: false, stamped: 'DENIED', errors: state.errors + (mistake ? 1 : 0), feedback: text });
+    playStamp(); schedule(fireShot, 500, 'shot'); schedule(advance, 3000, 'advance');
+  }
+
+  const archive: SaveSlotsProps = {
+    slots, canSave: game.scene !== 'menu',
+    currentLabel: `${shiftLabel(game.shift)}${game.scene === 'play' ? ` · посетитель ${game.index + 1}/${visitors.length}` : ''}`,
+    onSave: saveSlot, onLoad: loadSlot, onDelete: removeSlot,
+  };
+  const totalErrors = game.history.reduce((total, result) => total + result.errors, 0);
+
+  return (
+    <div className={`grain vignette app-shell${game.flash ? ' blood-flash' : ''}${paused || savesOpen ? ' is-paused' : ''}`} onPointerDownCapture={enableAudio} onClickCapture={enableAudio} onKeyDownCapture={enableAudio}>
+      <header className="app-header">
+        <span className="app-header__caption">{game.scene === 'play' ? `${shiftLabel(game.shift).toUpperCase()} · ПОСТ OSTMARK-3` : 'DAS GRENZAMT · 1943'}</span>
+        <button className="metal-btn pause-toggle" onClick={() => changePause(true)} aria-label="Открыть паузу, сохранения и настройки" aria-haspopup="dialog" aria-expanded={paused} aria-controls="pause-menu" title="Пауза (Esc)">
+          <svg width="13" height="15" viewBox="0 0 13 15" fill="none" aria-hidden="true"><rect x="1" y="1" width="3" height="13" fill="currentColor" /><rect x="9" y="1" width="3" height="13" fill="currentColor" /></svg>ПАУЗА
+        </button>
+      </header>
+      <div className="scene-content" inert={paused || savesOpen} aria-hidden={paused || savesOpen ? true : undefined}>
+        {game.scene === 'menu' && (
+          <Menu
+            onStart={startNewGame}
+            onSelectShift={startAtShift}
+            onSaves={() => { refreshSlots(); setSavesOpen(true); }}
+          />
+        )}
+        {game.scene === 'intro' && <Intro onNext={() => updateGame({ scene: 'briefing' })} />}
+        {game.scene === 'briefing' && <Briefing onNext={() => updateGame({ scene: 'newspaper' })} />}
+        {game.scene === 'newspaper' && <Newspaper day={game.shift} onContinue={() => updateGame({ scene: 'play' })} />}
+        {game.scene === 'play' && current && (
+          <GameScreen key={`${loadEpoch}-${game.shift}-${current.id}`} shift={game.shift} visitor={current} total={visitors.length} errors={game.errors}
+            tool={game.tool} setTool={(tool) => updateGame({ tool })} paused={paused || savesOpen} stamped={game.stamped}
+            onApprove={handleApprove} onRefuse={handleRefuse} onAlarm={handleAlarm} showDenyMenu={game.showDenyMenu} onCloseDeny={() => updateGame({ showDenyMenu: false })}
+            onSelectCreature={selectCreature} feedback={game.feedback} processed={game.processed} initial={game.inspections} registerSnapshot={registerSnapshot} />
+        )}
+        {game.scene === 'gameover' && <EndScreen title="ОТСТРАНЁН ОТ СЛУЖБЫ" text={`Третья ошибка. ${shiftLabel(game.shift)} окончена для вас. Можно загрузить ручное или последнее автосохранение.`} onRetry={startNewGame} onSaves={() => { refreshSlots(); setSavesOpen(true); }} />}
+        {game.scene === 'victory' && (
+          <EndScreen title="СМЕНА ЗАВЕРШЕНА"
+            text={`${shiftLabel(game.shift)} завершена. Ошибок за эту смену: ${game.errors}; за пройденные смены: ${totalErrors}. Это не конец службы. Сейчас доступны смены 1–${LATEST_SHIFT}. Можно выбрать другую смену или открыть сохранение.`}
+            onRetry={startNewGame} onMainMenu={goToMenu}
+            onSaves={() => { refreshSlots(); setSavesOpen(true); }} />
+        )}
+      </div>
+      {paused && <PauseMenu settings={audioSettings} inShift={game.scene === 'play'} archive={archive} onVolume={(channel, value) => setAudioSettings(setAudioVolume(channel, value))} onResume={() => changePause(false)} onMainMenu={game.scene === 'menu' ? undefined : goToMenu} />}
+      {savesOpen && <SaveMenu archive={archive} onClose={() => setSavesOpen(false)} />}
+      {notice && <div className="session-toast" role="status">{notice}</div>}
+    </div>
+  );
+}
