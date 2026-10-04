@@ -1,0 +1,74 @@
+.desk-workspace > * { flex-shrink: 0; }
+.measurement-panel { margin: 0 0 12px; padding: 10px; border: 1px solid #8b6a45; background: #211810; color: #d8c097; }
+.measurement-panel__heading { margin-bottom: 5px; color: #e6cf9d; font-size: 10px; letter-spacing: .13em; }
+.measurement-panel__hint { margin: 0 0 8px; font-size: 11px; line-height: 1.45; }
+.measurement-panel__actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 7px; }
+.measurement-panel__status { margin-top: 7px; color: #c58e60; font-size: 10px; }
+.desk-layout-toggle { display: block; align-self: flex-start; min-height: 40px; padding: 8px 0; background: transparent; border: 0; color: #cbb38d; font-size: 11px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.desk-layout-toggle:disabled { opacity: 0.5; }
+.desk-document { overflow-wrap: anywhere; }
+.desk-document__heading { margin-bottom: 11px; padding-bottom: 7px; border-bottom: 1px solid #8a7050; text-align: center; color: #44321c; font-size: 10px; letter-spacing: 0.13em; line-height: 1.5; font-weight: 700; }
+.passport-content { display: flex; gap: 12px; align-items: flex-start; }
+.passport-content .document-photo { border: 1px solid #856747; flex-basis: 76px; width: 76px; height: 92px; }
+.desk-document__data { flex: 1; min-width: 0; }
+.desk-doc-row { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 4px 8px; align-items: start; width: 100%; min-width: 0; padding: 6px 0; border: 0; border-bottom: 1px solid #80644240; background: transparent; color: #2a1e10; text-align: left; line-height: 1.4; }
+.desk-doc-label { color: #75542f; font-size: 9px; letter-spacing: 0.045em; padding-top: 1px; }
+.desk-doc-value { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.desk-doc-question { grid-column: 2; justify-self: end; color: #735434; font-size: 9px; text-decoration: underline; text-underline-offset: 3px; }
+.desk-doc-row--question { cursor: pointer; }
+.desk-doc-row--question:hover:not(:disabled) { background: #64482212; }
+.desk-doc-row--question:disabled { cursor: default; }
+.desk-doc-row--question:focus-visible { outline: 2px solid #705735; outline-offset: 3px; }
+.desk-document__footer { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 11px; padding-top: 7px; border-top: 1px solid #8a7050; color: #72512f; font-size: 10px; font-style: italic; line-height: 1.4; text-align: center; }
+.desk-document__stamp { position: absolute; top: 31px; right: 12px; font-size: clamp(12px, 2vw, 23px); max-width: calc(100% - 24px); pointer-events: none; }
+.document-pair { display: grid; gap: 12px; width: 100%; }
+.document-pair .document-card { max-width: none; }
+.document-pair .passport-content .document-photo { flex-basis: 62px; width: 62px; height: 76px; }
+.desk-doc-row .visitor-typewriter { font-size: inherit; }
+
+/* One vertical scrolling surface on mobile; children let a swipe bubble to it.
+   Native touch scrolling wins over grabbing paper. Mouse dragging is unchanged. */
+@media (max-width: 760px), (pointer: coarse) and (max-width: 1024px) {
+  .scene-content .game-screen { display: block; height: 100%; overflow-y: auto; overflow-x: hidden; padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); touch-action: pan-y pinch-zoom; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #806648 #19130f; }
+  .game-screen .visitor-panel { position: sticky; top: 0; z-index: 4; margin-bottom: 8px; gap: 4px; padding: 7px 10px 6px; box-shadow: 0 6px 15px #0006; }
+  .game-screen .visitor-window { flex: 0 0 auto; }
+  .game-screen .visitor-photo-frame { height: clamp(116px, 20dvh, 176px); max-height: none; border-width: 5px; }
+  .game-screen .visitor-panel__top { font-size: 9px; letter-spacing: 0.08em; }
+  .game-screen .game-bottom { display: flex; flex-direction: column; gap: 8px; min-height: auto; overflow: visible; padding: 0; touch-action: pan-y pinch-zoom; }
+  .game-screen .game-main-column { display: flex; flex: 0 0 auto; flex-direction: column; gap: 8px; }
+  .game-screen .game-sidebar { flex: 0 0 auto; gap: 8px; }
+  .game-bottom .desk-workspace { max-height: none; height: auto; overflow: visible; overscroll-behavior: auto; touch-action: pan-y pinch-zoom; padding-right: 0; }
+  .game-bottom .inspection-panel { overflow: visible; align-items: stretch; min-height: 190px; padding: 10px; }
+  .game-bottom .inspection-content { height: auto; max-height: none; overflow: visible; }
+  .game-bottom .dental-log { max-height: none; overflow: visible; overscroll-behavior: auto; }
+  .game-bottom .notebook-panel { overflow: visible; max-height: none; }
+  .game-bottom .document-card, .game-bottom .document-card *,
+  .game-bottom button, .game-bottom label, .booth-slot button { touch-action: pan-y pinch-zoom; }
+  .slot-doc-token { touch-action: pan-y pinch-zoom; }
+  .desk-tabs { flex-shrink: 0; }
+  .desk-tab { min-height: 44px; }
+  .desk-question-btn { min-height: 44px; font-size: 12px; }
+  .desk-doc-row { grid-template-columns: 64px minmax(0, 1fr); padding: 7px 0; }
+  .desk-doc-row--question { min-height: 44px; }
+  .desk-doc-value { font-size: 12px; }
+  .passport-content { gap: 9px; }
+  .passport-content .document-photo { flex-basis: 62px; width: 62px; height: 76px; }
+  .visitor-panel { flex-shrink: 0; }
+  .booth-slot { flex: 0 0 auto; }
+  .booth-slot__request-btn, .booth-slot__take-all { min-height: 42px; }
+  .game-bottom .dental-inspection { height: auto; }
+  .game-bottom .dental-image { flex: 0 0 auto; height: clamp(175px, 48vw, 240px); min-height: 175px; }
+  .game-bottom .dental-image--hands { height: 260px; }
+}
+
+@media (max-height: 550px) and (pointer: coarse) and (max-width: 1024px) {
+  .game-screen .visitor-panel { position: relative; }
+  .game-screen .visitor-photo-frame { height: 108px; }
+}
+
+@media (min-width: 1400px) {
+  .document-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .document-pair .passport-content { display: block; }
+  .document-pair .document-photo { float: left; margin: 0 8px 8px 0; }
+  .document-pair .desk-document__data { clear: both; }
+}

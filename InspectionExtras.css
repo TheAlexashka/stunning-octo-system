@@ -1,0 +1,273 @@
+import { memo, useId, useMemo } from 'react';
+
+/**
+ * ============================================================================
+ * HeadStubble.tsx — Автономный компонент стерни для головы (Face.tsx / Head.tsx)
+ * ============================================================================
+ * 
+ * ВАЖНО ДЛЯ AGENT MODE:
+ * 1. Этот компонент вставляется в Face.tsx (или Head.tsx) СРАЗУ ПОСЛЕ отрисовки
+ *    кожи головы (<path d={headPath} fill={skin} />) и ДО бровей/глаз/волос!
+ * 2. НЕ ВСТАВЛЯТЬ в Hair.tsx! Стерня — это часть головы/кожи, а не парик.
+ * 3. Он автоматически обрезается по контуру черепа (headPath) и рисует короткие
+ *    тонкие волоски на висках и затылке.
+ */
+
+export type StubblePreset =
+  | 'heydrich'       // Высокий пробор: ровная стерня на висках от брови до уха
+  | 'undercut'       // Выбритые виски с обеих сторон (высокий андеркат)
+  | 'clipper-crop'   // Армейский ёжик: стерня по всем бокам и затылку
+  | 'himmler'        // Редкая низкая стерня около ушей
+  | 'temples'        // Классическая лёгкая окантовка на висках
+  | 'custom';        // Ручная настройка зон
+
+export interface StubbleZone {
+  side: 'left' | 'right' | 'nape' | 'both-temples';
+  /** Верхняя граница в координатах лица (по умолчанию 52..62) */
+  topY: number;
+  /** Нижняя граница (по умолчанию 82..94) */
+  bottomY: number;
+  /** Отступ от центра лица по X (по умолчанию 28..42) */
+  spreadX: number;
+  /** Густота: 0..1 (по умолчанию 0.5) */
+  density: number;
+  /** Затухание: 'down' (редеет к шее), 'up' (редеет вверх), 'none' */
+  fade?: 'down' | 'up' | 'none';
+}
+
+export interface HeadStubbleProps {
+  /** SVG-путь контура головы, по которому обрезается стерня */
+  headPath?: string;
+  /** Готовый пресет стрижки */
+  preset?: StubblePreset;
+  /** Пользовательские зоны, если preset = 'custom' */
+  zones?: StubbleZone[];
+  /** Цвет волос (поддерживает hex, rgb или CSS-переменную var(--hair)) */
+  hairColor?: string;
+  /** Общий множитель густоты (0..150%, по умолчанию 100) */
+  density?: number;
+  /** Множитель длины волосков (50..175%, по умолчанию 100) */
+  length?: number;
+  /** Скрывать стерню при density = 0 */
+  disabled?: boolean;
+}
+
+const PRESET_ZONES: Record<StubblePreset, StubbleZone[]> = {
+  heydrich: [
+    { side: 'left', topY: 54, bottomY: 86, spreadX: 38, density: 0.55, fade: 'down' },
+    { side: 'right', topY: 56, bottomY: 86, spreadX: 38, density: 0.5, fade: 'down' },
+    { side: 'nape', topY: 62, bottomY: 88, spreadX: 36, density: 0.5, fade: 'down' },
+  ],
+  undercut: [
+    { side: 'left', topY: 50, bottomY: 88, spreadX: 40, density: 0.6, fade: 'down' },
+    { side: 'right', topY: 50, bottomY: 88, spreadX: 40, density: 0.6, fade: 'down' },
+    { side: 'nape', topY: 56, bottomY: 90, spreadX: 38, density: 0.55, fade: 'down' },
+  ],
+  'clipper-crop': [
+    { side: 'left', topY: 58, bottomY: 90, spreadX: 40, density: 0.7, fade: 'none' },
+    { side: 'right', topY: 58, bottomY: 90, spreadX: 40, density: 0.7, fade: 'none' },
+    { side: 'nape', topY: 58, bottomY: 92, spreadX: 40, density: 0.7, fade: 'none' },
+  ],
+  himmler: [
+    { side: 'left', topY: 62, bottomY: 86, spreadX: 36, density: 0.35, fade: 'down' },
+    { side: 'right', topY: 62, bottomY: 86, spreadX: 36, density: 0.35, fade: 'down' },
+    { side: 'nape', topY: 66, bottomY: 88, spreadX: 34, density: 0.35, fade: 'down' },
+  ],
+  temples: [
+    { side: 'left', topY: 64, bottomY: 84, spreadX: 36, density: 0.4, fade: 'down' },
+    { side: 'right', topY: 64, bottomY: 84, spreadX: 36, density: 0.4, fade: 'down' },
+  ],
+  custom: [],
+};
+
+// Детерминированный генератор псевдослучайных чисел
+function pseudoRand(seed: number): number {
+  const n = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+interface GeneratedStroke {
+  d: string;
+  width: number;
+  opacity: number;
+}
+
+interface RenderedZone {
+  id: string;
+  fillPath: string;
+  fillOpacity: number;
+  strokes: GeneratedStroke[];
+}
+
+// По умолчанию используется стандартный овал головы Atelier Linden (300x400)
+const DEFAULT_HEAD_PATH = 'M114 72C111 50 126 33 150 33C174 33 189 50 187 72L185 93C183 111 168 124 150 130C132 124 117 111 115 93Z';
+
+const HeadStubbleCore = memo(function HeadStubbleCore({
+  headPath = DEFAULT_HEAD_PATH,
+  preset = 'heydrich',
+  zones,
+  hairColor = 'var(--hair, #3a2a1e)',
+  density = 100,
+  length = 100,
+  disabled = false,
+}: HeadStubbleProps) {
+  const uid = `stubble-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const effectiveDensity = Math.max(0, Math.min(150, density)) / 100;
+  const lengthScale = Math.max(0.5, Math.min(1.75, length / 100));
+
+  const activeZones = useMemo(() => {
+    if (zones && zones.length > 0) return zones;
+    return PRESET_ZONES[preset] || PRESET_ZONES.heydrich;
+  }, [preset, zones]);
+
+  const renderedZones = useMemo((): RenderedZone[] => {
+    if (disabled || effectiveDensity <= 0.02) return [];
+
+    return activeZones.map((zone, zIdx) => {
+      const isLeft = zone.side === 'left' || zone.side === 'both-temples';
+      const isRight = zone.side === 'right' || zone.side === 'both-temples';
+      const isNape = zone.side === 'nape';
+      
+      const strokes: GeneratedStroke[] = [];
+      const topY = zone.topY;
+      const botY = zone.bottomY;
+      const height = botY - topY;
+      const baseLength = 2.2 * lengthScale;
+
+      // Ограничивающий полигон зоны стерни
+      let fillPath = '';
+      if (isLeft) {
+        fillPath = `M111 ${topY}C113 ${topY - 2} 120 ${topY - 3} 128 ${topY}L130 ${botY}C122 ${botY + 3} 115 ${botY + 2} 112 ${botY - 2}Z`;
+      } else if (isRight) {
+        fillPath = `M189 ${topY}C187 ${topY - 2} 180 ${topY - 3} 172 ${topY}L170 ${botY}C178 ${botY + 3} 185 ${botY + 2} 188 ${botY - 2}Z`;
+      } else if (isNape) {
+        fillPath = `M118 ${topY}C130 ${topY - 2} 170 ${topY - 2} 182 ${topY}L184 ${botY}C170 ${botY + 4} 130 ${botY + 4} 116 ${botY}Z`;
+      }
+
+      const rows = Math.max(8, Math.round(height * 0.9));
+      const cols = isNape ? 32 : 12;
+      const zoneDensity = zone.density * effectiveDensity;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const seed = zIdx * 1000 + r * 37 + c * 17;
+          const noise1 = pseudoRand(seed + 1);
+          const noise2 = pseudoRand(seed + 2);
+          const noise3 = pseudoRand(seed + 3);
+
+          const tY = (r + 0.3 + noise1 * 0.4) / rows;
+          const fadeMult = zone.fade === 'down'
+            ? 1 - tY * 0.75
+            : zone.fade === 'up'
+              ? 0.25 + tY * 0.75
+              : 1;
+
+          // Пропускаем часть точек по плотности
+          if (noise2 > zoneDensity * fadeMult * 1.3) continue;
+
+          const y = topY + tY * height;
+          let x = 150;
+
+          if (isLeft) {
+            const spread = 112 + (c / cols) * 16 + (noise3 - 0.5) * 2;
+            x = spread;
+          } else if (isRight) {
+            const spread = 188 - (c / cols) * 16 + (noise3 - 0.5) * 2;
+            x = spread;
+          } else if (isNape) {
+            const spread = 118 + (c / cols) * 64 + (noise3 - 0.5) * 3;
+            x = spread;
+          }
+
+          // Генерируем короткую изогнутую линию волоска (Q-curve)
+          const strokeLen = baseLength * (0.8 + noise1 * 0.4);
+          const tiltX = isLeft ? (noise3 - 0.2) * 1.2 : isRight ? (0.2 - noise3) * 1.2 : (noise3 - 0.5) * 1.5;
+          const endX = x + tiltX;
+          const endY = y + strokeLen;
+          const midX = x + tiltX * 0.4;
+          const midY = y + strokeLen * 0.5;
+
+          strokes.push({
+            d: `M${x.toFixed(2)} ${y.toFixed(2)}Q${midX.toFixed(2)} ${midY.toFixed(2)} ${endX.toFixed(2)} ${endY.toFixed(2)}`,
+            width: 0.32 + noise1 * 0.12,
+            opacity: (0.45 + noise2 * 0.35) * fadeMult,
+          });
+        }
+      }
+
+      return {
+        id: `${uid}-zone-${zIdx}`,
+        fillPath,
+        fillOpacity: Math.min(0.25, zone.density * effectiveDensity * 0.18),
+        strokes,
+      };
+    });
+  }, [activeZones, disabled, effectiveDensity, lengthScale, uid]);
+
+  if (disabled || renderedZones.length === 0) return null;
+
+  return (
+    <g data-component="HeadStubble" className="head-stubble-layer" pointerEvents="none">
+      <defs>
+        {/* Маска, строго ограничивающая волоски контуром кожи головы */}
+        <clipPath id={`${uid}-head-clip`} clipPathUnits="userSpaceOnUse">
+          <path d={headPath} />
+        </clipPath>
+      </defs>
+
+      <g clipPath={`url(#${uid}-head-clip)`}>
+        {renderedZones.map((zone) => (
+          <g key={zone.id} data-zone={zone.id}>
+            {/* Мягкая фоновая полупрозрачная растушёвка цвета волос на коже */}
+            {zone.fillPath && (
+              <path
+                d={zone.fillPath}
+                fill={hairColor}
+                opacity={zone.fillOpacity}
+              />
+            )}
+            {/* Тонкие изогнутые волоски стерни */}
+            <g fill="none" stroke={hairColor} strokeLinecap="round">
+              {zone.strokes.map((s, idx) => (
+                <path
+                  key={idx}
+                  d={s.d}
+                  strokeWidth={s.width}
+                  opacity={s.opacity}
+                />
+              ))}
+            </g>
+          </g>
+        ))}
+      </g>
+    </g>
+  );
+});
+export default HeadStubbleCore;
+
+import { useLayoutEffect, useState } from 'react';
+import { hasLindenScalp } from '../features/linden/catalog';
+import { LINDEN_HAIR_DESIGNS } from '../features/linden/catalog';
+import { MenScalp } from '../features/poster1930men/MenScalp';
+import { sampleHeadPath } from '../features/poster1930men/scalpGeometry';
+import type { HeadGeometry } from '../features/poster1930men/types';
+
+// Первый перенос: стерня — третий слой MenScalp, монтируется один раз
+// в системе координат головы, геометрия берётся с реального контура лица.
+export const HeadStubble = memo(function HeadStubble({ style, color, headRef, hairClip }: {
+  style: string; color: string; hairClip?: string; headPath?: string; headRef?: { current: SVGPathElement | null };
+}) {
+  const [head, setHead] = useState<HeadGeometry | null>(null);
+  useLayoutEffect(() => {
+    const node = headRef?.current;
+    if (node) setHead(sampleHeadPath(node, 'front'));
+  }, [headRef]);
+  if (!hasLindenScalp(style)) return null;
+  if (!LINDEN_HAIR_DESIGNS[style]?.scalp?.length) return null;
+  return (
+    <g data-portrait-layer="head-stubble" clipPath={hairClip} pointerEvents="none">
+      {head && <MenScalp styleId={style} designs={LINDEN_HAIR_DESIGNS} head={head}
+        face={{ posterHairColor: color, posterHairSecondary: color }} />}
+    </g>
+  );
+});

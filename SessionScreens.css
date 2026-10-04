@@ -1,0 +1,64 @@
+import { useState } from 'react';
+import { saveDescription, type ManualSlot, type SaveSlot, type SaveSlotId } from '../game/saves';
+import './SaveSlots.css';
+
+export type SaveSlotsProps = {
+  slots: SaveSlot[];
+  canSave: boolean;
+  currentLabel?: string;
+  onSave: (slot: ManualSlot) => { ok: boolean; message: string };
+  onLoad: (slot: SaveSlotId) => { ok: boolean; message: string };
+  onDelete: (slot: SaveSlotId) => { ok: boolean; message: string };
+};
+
+export function SaveSlots({ slots, canSave, currentLabel, onSave, onLoad, onDelete }: SaveSlotsProps) {
+  const [confirmation, setConfirmation] = useState<{ id: SaveSlotId; action: 'save' | 'load' | 'delete' } | null>(null);
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState(false);
+
+  function perform(id: SaveSlotId, action: 'save' | 'load' | 'delete') {
+    const result = action === 'save' && id !== 'auto' ? onSave(id) : action === 'load' ? onLoad(id) : onDelete(id);
+    setStatus(result.message); setError(!result.ok); setConfirmation(null);
+  }
+  function choose(slot: SaveSlot, action: 'save' | 'load' | 'delete') {
+    if (slot.record && (action !== 'load' || canSave)) setConfirmation({ id: slot.id, action });
+    else perform(slot.id, action);
+  }
+
+  return (
+    <section className="save-archive" aria-label="Сохранения">
+      {canSave && currentLabel && <div className="save-current">Текущий прогресс: {currentLabel}</div>}
+      <div className="save-slots">
+        {slots.map((slot) => {
+          const record = slot.record;
+          const asking = confirmation?.id === slot.id ? confirmation.action : null;
+          return (
+            <article key={slot.id} className={`save-card${slot.id === 'auto' ? ' save-card--auto' : ''}`}>
+              <div className="save-card__top"><h3>{slot.id === 'auto' ? 'АВТОСОХРАНЕНИЕ' : `СЛОТ ${slot.id}`}</h3><span>{slot.id === 'auto' ? 'АВТО' : 'РУЧНОЙ'}</span></div>
+              {record ? (
+                <>
+                  <p className="save-card__description">{saveDescription(record)}</p>
+                  <div className="save-card__meta"><span>Ошибки: {record.state.errors}/3</span><time dateTime={new Date(record.savedAt).toISOString()}>{new Date(record.savedAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</time></div>
+                </>
+              ) : <p className="save-card__empty">{slot.id === 'auto' ? 'Появится после первой завершённой смены' : 'Пустой слот'}</p>}
+              {asking ? (
+                <div className="save-confirm" role="alert">
+                  <p>{asking === 'save' ? 'Перезаписать этот слот?' : asking === 'delete' ? 'Удалить сохранение?' : 'Загрузить? Несохранённый прогресс будет потерян.'}</p>
+                  <div className="save-card__actions"><button className="metal-btn" onClick={() => perform(slot.id, asking)}>Подтвердить</button><button className="metal-btn" onClick={() => setConfirmation(null)}>Отмена</button></div>
+                </div>
+              ) : (
+                <div className="save-card__actions">
+                  {slot.id !== 'auto' && canSave && <button className="metal-btn" onClick={() => choose(slot, 'save')}>Сохранить</button>}
+                  <button className="metal-btn" disabled={!record} onClick={() => choose(slot, 'load')}>Загрузить</button>
+                  {record && <button className="save-delete" onClick={() => choose(slot, 'delete')}>Удалить</button>}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      {status && <div className={`save-status${error ? ' save-status--error' : ''}`} role="status">{status}</div>}
+      <p className="save-archive__note">Хранится в этом браузере. Новая игра не удаляет сохранения.</p>
+    </section>
+  );
+}

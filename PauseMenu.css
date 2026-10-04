@@ -1,0 +1,206 @@
+import { shade } from '../utils/color';
+
+export const NOSE_TYPES = [
+  'straight', 'wide-tip', 'aquiline', 'button', 'roman', 'wide', 'narrow', 'bulbous', 'broken',
+] as const;
+export type NoseType = (typeof NOSE_TYPES)[number];
+
+export const NOSE_LABELS: Record<NoseType, string> = {
+  straight: 'Прямой',
+  'wide-tip': 'Прямой, с широким кончиком и ноздрями',
+  aquiline: 'Орлиный, с опущенным кончиком',
+  button: 'Курносый',
+  roman: 'Римский, с невысокой горбинкой',
+  wide: 'Широкий',
+  narrow: 'Тонкий',
+  bulbous: 'Картошкой',
+  broken: 'Перебитый',
+};
+
+// The nose now runs from the nasion (y = 109) to a base at y ≈ 140–144:
+// about 15% shorter than before, which leaves room for a mustache under it.
+const ROOT_Y = 109;
+
+type NoseSpec = {
+  rootW: number;       // half-width at the nasion (between the eyes)
+  midW: number;        // half-width at mid-bridge
+  tipW: number;        // half-width of the tip
+  wingW: number;       // half-width across the alae
+  tipY: number;
+  baseY: number;       // subnasale / nostril line
+  hump: number;        // dorsal hump pushing the bridge edges outwards
+  humpT: number;       // 0..1 position of the hump along the bridge
+  shift: number;       // bridge kink to the side (broken nose)
+  lean: number;        // tip deviation
+  saddle: number;      // concave bridge
+  nostrilW: number;
+  nostrilH: number;
+  nostrilDx: number;
+  nostrilTilt: number;
+  nostrilAsym: number;
+  blush: number;
+};
+
+const SPECS: Record<NoseType, NoseSpec> = {
+  straight: {
+    rootW: 4.4, midW: 5.6, tipW: 5.6, wingW: 9, tipY: 138, baseY: 143,
+    hump: 0, humpT: 0.42, shift: 0, lean: 0, saddle: 0,
+    nostrilW: 2.5, nostrilH: 1.3, nostrilDx: 4.3, nostrilTilt: 14, nostrilAsym: 1, blush: 0,
+  },
+  'wide-tip': {
+    rootW: 4.4, midW: 5.7, tipW: 7, wingW: 10.8, tipY: 138.2, baseY: 143.2,
+    hump: 0, humpT: 0.42, shift: 0, lean: 0, saddle: 0,
+    nostrilW: 3.35, nostrilH: 1.55, nostrilDx: 5.2, nostrilTilt: 11, nostrilAsym: 1, blush: 0.03,
+  },
+  aquiline: {
+    rootW: 5, midW: 6.2, tipW: 5, wingW: 8.8, tipY: 141.3, baseY: 143.5,
+    hump: 2.3, humpT: 0.36, shift: 0, lean: 0, saddle: 0,
+    nostrilW: 2.1, nostrilH: 1.2, nostrilDx: 3.8, nostrilTilt: 20, nostrilAsym: 1, blush: 0,
+  },
+  button: {
+    rootW: 3.6, midW: 4.3, tipW: 5.2, wingW: 8.2, tipY: 134.8, baseY: 140.6,
+    hump: 0, humpT: 0.42, shift: 0, lean: 0, saddle: 1,
+    nostrilW: 2.3, nostrilH: 1.9, nostrilDx: 3.8, nostrilTilt: 6, nostrilAsym: 1, blush: 0.12,
+  },
+  roman: {
+    rootW: 5.4, midW: 6.8, tipW: 6.4, wingW: 10, tipY: 139, baseY: 143.6,
+    hump: 1.9, humpT: 0.34, shift: 0, lean: 0, saddle: 0,
+    nostrilW: 2.8, nostrilH: 1.3, nostrilDx: 4.7, nostrilTilt: 10, nostrilAsym: 1, blush: 0,
+  },
+  wide: {
+    rootW: 6, midW: 7.8, tipW: 7.8, wingW: 12.4, tipY: 138.6, baseY: 143.6,
+    hump: 0, humpT: 0.42, shift: 0, lean: 0, saddle: 0.4,
+    nostrilW: 3.5, nostrilH: 1.5, nostrilDx: 6, nostrilTilt: 8, nostrilAsym: 1, blush: 0.04,
+  },
+  narrow: {
+    rootW: 3.4, midW: 4.1, tipW: 4.1, wingW: 7, tipY: 139, baseY: 143.5,
+    hump: 0, humpT: 0.42, shift: 0, lean: 0, saddle: 0,
+    nostrilW: 1.8, nostrilH: 1.4, nostrilDx: 3, nostrilTilt: 20, nostrilAsym: 1, blush: 0,
+  },
+  bulbous: {
+    rootW: 4.6, midW: 5.9, tipW: 8.4, wingW: 11, tipY: 138.8, baseY: 144,
+    hump: 0, humpT: 0.42, shift: 0, lean: 0, saddle: 0,
+    nostrilW: 2.8, nostrilH: 1.5, nostrilDx: 4.9, nostrilTilt: 8, nostrilAsym: 1, blush: 0.22,
+  },
+  broken: {
+    rootW: 4.8, midW: 6, tipW: 6, wingW: 9.6, tipY: 138.6, baseY: 143,
+    hump: 1.7, humpT: 0.36, shift: 2.4, lean: 2, saddle: 0,
+    nostrilW: 2.8, nostrilH: 1.4, nostrilDx: 4.6, nostrilTilt: 12, nostrilAsym: 0.72, blush: 0.06,
+  },
+};
+
+export function Nose({ type, skin, uid }: { type: NoseType; skin: string; uid: string }) {
+  const n = SPECS[type];
+  const deep = shade(skin, -40);
+  const mid = shade(skin, -22);
+  const light = shade(skin, 14);
+  const cx = 100;
+  const tx = cx + n.lean;
+  const ty = n.tipY;
+  const by = n.baseY;
+  const span = by - ROOT_Y;
+  const mw = n.midW - n.saddle;
+  const hy = ROOT_Y + n.humpT * span;
+
+  // Both bridge edges follow the same anatomy: root -> (hump) -> tip.
+  const edge = (side: 1 | -1) =>
+    `M ${cx + side * n.rootW} ${ROOT_Y} ` +
+    `C ${cx + side * n.rootW + n.shift * 0.4} ${ROOT_Y + 0.16 * span} ${cx + side * (mw + n.hump * 0.6) + n.shift} ${hy - 3} ${cx + side * (mw + n.hump * 0.3) + n.shift} ${hy + 3} ` +
+    `C ${cx + side * mw + n.shift * 0.4} ${hy + 3 + (ty - hy) * 0.3} ${tx + side * n.tipW * 0.75} ${ty - 5} ${tx + side * n.tipW * 0.9} ${ty - 1}`;
+
+  const ala = (side: 1 | -1) =>
+    `M ${tx + side * n.tipW * 0.9} ${ty - 1} ` +
+    `C ${cx + side * (n.wingW + 1.5)} ${ty - 1.5} ${cx + side * (n.wingW + 2)} ${by - 5} ${cx + side * (n.wingW - 2.4)} ${by + 0.3}`;
+
+  const groove = (side: 1 | -1) =>
+    `M ${cx + side * (n.wingW - 1.2)} ${ty + 0.5} ` +
+    `Q ${cx + side * (n.wingW - 3.4)} ${by - 3} ${cx + side * (n.nostrilDx + n.nostrilW - 0.2)} ${by - 1.1}`;
+
+  const nostrilX = (side: 1 | -1) => cx + side * n.nostrilDx + n.lean * 0.35;
+  const nostrilY = by - 0.5;
+
+  return (
+    <g>
+      <defs>
+        <filter id={`${uid}-nsoft`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.9" />
+        </filter>
+      </defs>
+
+      {/* Nasion shadows at the inner corners of the eyes. */}
+      <path d="M 90.8 102.5 C 93 105.5 94.4 108 95.4 111" fill="none" stroke={deep} strokeWidth="0.8" opacity="0.22" />
+      <path d="M 109.2 102.5 C 107 105.5 105.6 108 104.6 111" fill="none" stroke={deep} strokeWidth="0.8" opacity="0.22" />
+
+      {/* Shadowed side plane (light comes from the upper left). */}
+      <path
+        d={`${edge(1)} L ${tx + 1.2} ${ty - 3} C ${cx + 1 + n.shift} ${hy + (ty - hy) * 0.4} ${cx + 1 + n.shift * 0.5} ${ROOT_Y + span * 0.22} ${cx + 0.8} ${ROOT_Y + 1} Z`}
+        fill={deep}
+        opacity="0.17"
+        filter={`url(#${uid}-nsoft)`}
+      />
+      <path d={edge(-1)} fill="none" stroke={deep} strokeWidth="0.6" opacity="0.28" strokeLinecap="round" />
+      <path d={edge(1)} fill="none" stroke={deep} strokeWidth="0.75" opacity="0.42" strokeLinecap="round" />
+
+      {/* Dorsum highlight. */}
+      <path
+        d={`M ${cx - 0.6} ${ROOT_Y + 1} C ${cx + n.shift * 0.4} ${ROOT_Y + span * 0.3} ${cx + n.shift} ${hy + (ty - hy) * 0.5} ${tx} ${ty - 4.5}`}
+        fill="none"
+        stroke={light}
+        strokeWidth="1.8"
+        opacity="0.42"
+        strokeLinecap="round"
+        filter={`url(#${uid}-nsoft)`}
+      />
+
+      {n.hump > 0 && (
+        <>
+          <ellipse cx={cx - 0.8 + n.shift} cy={hy} rx="2" ry="3.6" fill={light} opacity="0.42" filter={`url(#${uid}-nsoft)`} />
+          <ellipse cx={cx + 2 + n.shift} cy={hy + (ty - hy) * 0.4} rx="2.4" ry="2.6" fill={deep} opacity="0.22" filter={`url(#${uid}-nsoft)`} />
+        </>
+      )}
+      {type === 'broken' && (
+        <path d={`M ${cx - 3 + n.shift} ${hy + 2} l 6 2`} stroke={deep} strokeWidth="0.6" opacity="0.35" strokeLinecap="round" />
+      )}
+
+      {/* Tip, alae and the shadow under the tip. */}
+      <ellipse cx={tx} cy={ty - 0.5} rx={n.tipW * 0.85} ry={n.tipW * 0.65} fill="#c0675a" opacity={n.blush} />
+      <ellipse cx={tx} cy={by - 1.4} rx={n.tipW * 0.7} ry="2" fill={deep} opacity="0.2" filter={`url(#${uid}-nsoft)`} />
+      <ellipse cx={tx - 0.8} cy={ty - 2.2} rx={n.tipW * 0.5} ry="2.4" fill={light} opacity="0.4" filter={`url(#${uid}-nsoft)`} />
+
+      {([-1, 1] as const).map((side) => (
+        <g key={side}>
+          <path
+            d={`${ala(side)} L ${cx + side * 2} ${by + 0.6} L ${tx + side * n.tipW * 0.45} ${ty + 0.5} Z`}
+            fill={mid}
+            opacity="0.14"
+          />
+          <path d={ala(side)} fill="none" stroke={deep} strokeWidth="0.9" opacity="0.55" strokeLinecap="round" />
+          <path d={groove(side)} fill="none" stroke={mid} strokeWidth="0.6" opacity="0.4" strokeLinecap="round" />
+          <path
+            d={`M ${tx + side * 1.8} ${ty + 0.5} L ${cx + side * 1.2} ${by - 0.6}`}
+            fill="none"
+            stroke={mid}
+            strokeWidth="0.6"
+            opacity="0.3"
+          />
+        </g>
+      ))}
+
+      {/* Nostrils. */}
+      <ellipse
+        cx={nostrilX(-1)} cy={nostrilY} rx={n.nostrilW} ry={n.nostrilH}
+        transform={`rotate(${-n.nostrilTilt} ${nostrilX(-1)} ${nostrilY})`}
+        fill="#21130f" opacity="0.84"
+      />
+      <ellipse
+        cx={nostrilX(1)} cy={nostrilY} rx={n.nostrilW * n.nostrilAsym} ry={n.nostrilH * n.nostrilAsym}
+        transform={`rotate(${n.nostrilTilt} ${nostrilX(1)} ${nostrilY})`}
+        fill="#21130f" opacity="0.84"
+      />
+      <path
+        d={`M ${cx - n.wingW + 2.4} ${by + 0.4} Q ${cx + n.lean * 0.3} ${by + 2.8} ${cx + n.wingW - 2.4} ${by + 0.4}`}
+        fill="none" stroke={deep} strokeWidth="0.8" opacity="0.42" strokeLinecap="round"
+      />
+    </g>
+  );
+}
