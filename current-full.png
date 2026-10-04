@@ -1,0 +1,29 @@
+import{chromium}from'playwright';import assert from'node:assert/strict';
+const target=process.argv[2]||'file:///home/user/das-grenzamt.html';
+const b=await chromium.launch();const p=await b.newPage();
+const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.goto(target);await p.waitForTimeout(900);
+await p.getByRole('button',{name:'ГАЛЕРЕЯ ВНЕШНОСТИ',exact:true}).click();await p.waitForTimeout(400);
+const tabs=p.locator('.hair-gallery__tabs');const opts=p.locator('.hair-gallery__options button');
+async function check(person,sub){
+  await tabs.nth(0).getByRole('tab',{name:person}).click();await p.waitForTimeout(250);
+  await tabs.nth(1).getByRole('tab',{name:'Одежда'}).click();await p.waitForTimeout(250);
+  const n=await opts.count();let idx=-1;
+  for(let i=0;i<n;i++){const t=await opts.nth(i).textContent();if(t&&t.includes(sub)){idx=i;break}}
+  await opts.nth(idx).click();await p.waitForTimeout(500);
+  const st=await p.evaluate(()=>{const svg=document.querySelector('.hair-gallery__portrait-svg');
+    const body=svg.querySelector('[data-portrait-layer="body"]');
+    const bb=body.getBBox();
+    return{bodyPaths:body.querySelectorAll('path').length,bodyTop:Math.round(bb.y),bodyH:Math.round(bb.height),
+      cloth:svg.querySelectorAll('[data-potato-clothing] path').length}});
+  console.log(person,sub,JSON.stringify(st));
+  assert(st.bodyPaths>0,'body missing!');
+  assert(st.bodyH>400,'body too short (head would float)');
+}
+await check('Мужчина','Жилет');
+await check('Мужчина','Вермахт, M43');
+await check('Женщина','Дирндль');
+await check('Женщина','сестры милосердия');
+assert.deepEqual(errs,[]);
+console.log('BODY OK on',target);
+await b.close();
