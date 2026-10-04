@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-02",
+  "scope": "Диалоги: истории про зрачки, вопрос о зубах для всех типов, удаление подсказки про людей",
+  "checks": {
+    "horizontalPupilStories": 7,
+    "teethQuestion": {
+      "human": "обычные зубы",
+      "mermaid": "ряды/море",
+      "nixMale": "река/тина",
+      "vampire": "клыки"
+    },
+    "newspaperNoHumanYellowHint": true,
+    "snapshotTeethq": true,
+    "regression": {
+      "pearls": true,
+      "saltHaze": true,
+      "algae": true
+    },
+    "errorSweepShifts1to8": true,
+    "pageErrors": []
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "request": "Add 36 livelier shared neutral Russian arrivals",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "sourceOnlyChange": "36 array entries appended; greeting selector / legacy migration / visitor generator / gameplay / rendering unchanged",
+  "collectionChecks": {
+    "addedTemplates": 36,
+    "totalTemplates": 52,
+    "original16Unchanged": true,
+    "uniqueTemplates": true,
+    "russianAndGenderChecks": 104,
+    "noTypeClues": true,
+    "typeEqualityIDs": 5000,
+    "visitorChecks": 30000,
+    "all52TemplatesSeen": true,
+    "neutralBankIndependentOfAccessories": true,
+    "campaignVisitors": 60,
+    "newTemplatesInCampaign": 47,
+    "nonArrivalSavedSpeechUnchanged": true,
+    "maxResolvedLength": 106,
+    "samples": [
+      {
+        "id": 1,
+        "type": "human",
+        "quote": "Я себе всё на бумажке записала, чтобы не растеряться. А бумажку, кажется, положила слишком надёжно."
+      },
+      {
+        "id": 2,
+        "type": "human",
+        "quote": "Если будет нужна подпись, покажите куда. Ручку я даже наготове держу."
+      },
+      {
+        "id": 3,
+        "type": "vampire",
+        "quote": "Здравствуйте. Все нужные печати на месте. По крайней мере, в конторе так обещали."
+      },
+      {
+        "id": 5,
+        "type": "werewolf",
+        "quote": "Я до самого окна думала, в каком кармане паспорт. Конечно, он оказался в том, который проверила последним."
+      },
+      {
+        "id": 6,
+        "type": "human",
+        "quote": "Надеюсь, вы разбираете такой почерк. Я на фамилию писаря смотрю — и уже ничего не понимаю."
+      },
+      {
+        "id": 7,
+        "type": "mermaid",
+        "quote": "Если всё в порядке, подскажите, где здесь выход. Я в этих коридорах уже один раз заблудился."
+      }
+    ]
+  },
+  "interfaceAndStandalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "realTypesChecked": 6,
+    "newGreetingsShown": true,
+    "allWindowIrisesPreserved": true,
+    "mobileOverflow": false,
+    "manualSave": true,
+    "v1Schema": true,
+    "tested": [
+      {
+        "type": "human",
+        "quote": "Я себе всё на бумажке записала, чтобы не растеряться. А бумажку, кажется, положила слишком надёжно."
+      },
+      {
+        "type": "vampire",
+        "quote": "Здравствуйте. Все нужные печати на месте. По крайней мере, в конторе так обещали."
+      },
+      {
+        "type": "werewolf",
+        "quote": "Я до самого окна думала, в каком кармане паспорт. Конечно, он оказался в том, который проверила последним."
+      },
+      {
+        "type": "mermaid",
+        "quote": "Если всё в порядке, подскажите, где здесь выход. Я в этих коридорах уже один раз заблудился."
+      },
+      {
+        "type": "ghoul",
+        "quote": "Простите, я не расслышал: к вам или в соседнее окно? Здесь все машут в разные стороны."
+      },
+      {
+        "type": "doppelganger",
+        "quote": "Если будет нужна подпись, покажите куда. Ручку я даже наготове держу."
+      }
+    ],
+    "errors": []
+  }
+}

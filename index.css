@@ -1,108 +1,309 @@
-import { memo, useId } from 'react';
-import type { FaceSel, Gender } from '../data/types';
-import { effectsVolume } from '../data/skinEffects';
-import { getFaceGeometry } from '../data/faceGeometry';
-import { FACE_PROSTHETICS } from '../data/prosthetics';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GameScreen } from './components/GameScreen';
+import { Menu, Intro, Briefing, EndScreen } from './components/SessionScreens';
+import { Newspaper } from './components/Newspaper';
+import { PauseMenu } from './components/PauseMenu';
+import { SaveMenu } from './components/SaveMenu';
+import type { SaveSlotsProps } from './components/SaveSlots';
+import { buildShift, CREATURE_LABELS, type CreatureType } from './game/visitors';
+import { music, type TrackName } from './game/music';
+import { playButtonClick, playDoor, playGunshot, playStamp } from './game/sounds';
+import { getAudioSettings, setAudioVolume } from './game/audio';
+import { useGameTimers } from './game/useGameTimers';
+import { newSession, SHIFT_TOTALS, LATEST_SHIFT, shiftLabel, type Scene, type SessionState, type Shift } from './game/session';
+import type { InspectionProgress } from './game/conversation';
+import { deleteSave, readSave, readSaveSlots, writeSave, type ManualSlot, type SaveSlotId } from './game/saves';
 
-/** Протезы: нос/челюсть привязаны к чертам, маски обрезаются по контуру лица.
- *  Стеклянные глаза здесь не рисуем — они внутри век в Face.tsx. */
-export const ProstheticsLayer = memo(function ProstheticsLayer({
-  face,
-  skin,
-  gender,
-}: {
-  face: FaceSel;
-  skin: string;
-  gender: Gender;
-}) {
-  const clipId = `pm-${useId().replace(/:/g, '')}`;
-  const prosthetics = face.prosthetics ?? {};
-  const entries = Object.entries(prosthetics).filter(
-    ([id, v]) => v > 0 && !id.startsWith('glass-eye'),
-  );
-  if (!entries.length) return null;
+const GOEBBELS_EASTERN_FRONT_ENDING = 'Вместо выстрела в журнале появилась одна строка: «Клерк отправлен на Восточный фронт». Вас увезли до рассвета.';
 
-  const morph = {
-    chinWidth: face.chinWidth,
-    chinLength: face.chinLength,
-    jawWidth: face.jawWidth,
-    cheekVolume: Math.round(effectsVolume(face.skinEffects)),
+const SCENE_MUSIC: Record<Scene, TrackName> = {
+  menu: 'menu', intro: 'letter', briefing: 'letter', newspaper: 'letter',
+  play: 'shift', gameover: 'defeat', victory: 'victory',
+};
+
+export default function App() {
+  const [game, setGame] = useState(() => newSession());
+  const [goebbelsConfrontation, setGoebbelsConfrontation] = useState(0);
+  const gameRef = useRef(game);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const [savesOpen, setSavesOpen] = useState(false);
+  const [slots, setSlots] = useState(readSaveSlots);
+  const [audioSettings, setAudioSettings] = useState(getAudioSettings);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [loadEpoch, setLoadEpoch] = useState(0);
+  const inspectionReader = useRef<(() => InspectionProgress) | null>(null);
+  const restoreTimers = useRef<Record<string, number> | null>(null);
+  const { schedule, pause: pauseTimers, resume: resumeTimers, clear: clearTimers, remaining } = useGameTimers();
+  const visitors = useMemo(() => buildShift(game.shift), [game.shift]);
+  const current = visitors[game.index];
+
+  // Ref updates are synchronous, so double-clicking never repeats a decision.
+  const updateGame = useCallback((change: Partial<SessionState>) => {
+    const next = { ...gameRef.current, ...change };
+    gameRef.current = next;
+    setGame(next);
+  }, []);
+  const refreshSlots = useCallback(() => setSlots(readSaveSlots()), []);
+  const registerSnapshot = useCallback((reader: (() => InspectionProgress) | null) => { inspectionReader.current = reader; }, []);
+  const enableAudio = useCallback(() => { void music.unlock(); }, []);
+  const changePause = useCallback((value: boolean) => {
+    pausedRef.current = value;
+    if (value) pauseTimers(); else resumeTimers();
+    setPaused(value);
+  }, [pauseTimers, resumeTimers]);
+
+  const autoSave = useCallback((state: SessionState, completed: Shift) => {
+    const result = writeSave('auto', state, completed);
+    refreshSlots();
+    setNotice(result.ok ? `Смена ${completed} завершена · автосохранение записано` : result.message);
+  }, [refreshSlots]);
+
+  const advance = useCallback(() => {
+    const previous = gameRef.current;
+    setGoebbelsConfrontation(0);
+    clearTimers();
+    inspectionReader.current = null;
+    const common = { stamped: null, tool: null, feedback: null, specialEnding: null, flash: false, showDenyMenu: false, inspections: null, pendingTimers: {} } as const;
+    if (previous.errors >= 3) {
+      updateGame({ ...common, scene: 'gameover', processed: previous.index + 1 });
+    } else if (previous.index + 1 >= SHIFT_TOTALS[previous.shift]) {
+      const history = [...previous.history, { shift: previous.shift, errors: previous.errors, processed: SHIFT_TOTALS[previous.shift] }];
+      if (previous.shift < LATEST_SHIFT) {
+        const next = newSession('newspaper', (previous.shift + 1) as Shift, history);
+        updateGame(next);
+        autoSave(next, previous.shift);
+      } else {
+        // Keep the saved scene ID compatible, but show a shift report, not an ending.
+        const complete: SessionState = { ...previous, ...common, scene: 'victory', processed: SHIFT_TOTALS[previous.shift], history };
+        updateGame(complete);
+        autoSave(complete, previous.shift);
+      }
+    } else {
+      updateGame({ ...common, index: previous.index + 1, processed: previous.index + 1 });
+    }
+  }, [clearTimers, updateGame, autoSave]);
+
+  const fireShot = useCallback(() => {
+    playGunshot();
+    updateGame({ flash: true });
+    schedule(() => updateGame({ flash: false }), 1200, 'flash');
+  }, [updateGame, schedule]);
+
+  useEffect(() => { music.play(SCENE_MUSIC[game.scene]); }, [game.scene]);
+  useEffect(() => { if (game.scene === 'play') playDoor(); }, [game.scene, game.index, game.shift]);
+  useEffect(() => () => music.stop(), []);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !pausedRef.current && !savesOpen) {
+        event.preventDefault(); changePause(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [changePause, savesOpen]);
+  useEffect(() => {
+    const onVisibility = () => { if (document.hidden && gameRef.current.scene === 'play') changePause(true); };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [changePause]);
+
+  // Restore only known event types; no function/code is loaded from storage.
+  useEffect(() => {
+    const tasks = restoreTimers.current;
+    restoreTimers.current = null;
+    if (!tasks || gameRef.current.scene !== 'play') return;
+    if (tasks.shot !== undefined) schedule(fireShot, tasks.shot, 'shot');
+    if (tasks.flash !== undefined) schedule(() => updateGame({ flash: false }), tasks.flash, 'flash');
+    if (tasks.advance !== undefined) schedule(advance, tasks.advance, 'advance');
+  }, [loadEpoch, schedule, fireShot, advance, updateGame]);
+
+  function resetRuntime() {
+    setGoebbelsConfrontation(0);
+    clearTimers(); resumeTimers();
+    pausedRef.current = false;
+    setPaused(false); setSavesOpen(false);
+    restoreTimers.current = null;
+    inspectionReader.current = null;
+    setLoadEpoch((value) => value + 1);
+  }
+  function startNewGame() { resetRuntime(); updateGame(newSession('intro')); }
+  function startAtShift(shift: Shift) {
+    resetRuntime();
+    updateGame(shift === 1 ? newSession('intro') : newSession('newspaper', shift));
+  }
+  function goToMenu() { resetRuntime(); updateGame(newSession()); }
+
+  function capture(): SessionState {
+    const currentState = gameRef.current;
+    return {
+      ...currentState,
+      pendingTimers: remaining(),
+      inspections: currentState.scene === 'play' ? inspectionReader.current?.() ?? currentState.inspections : null,
+    };
+  }
+  function saveSlot(slot: ManualSlot) {
+    const result = writeSave(slot, capture());
+    refreshSlots();
+    return result;
+  }
+  function loadSlot(slot: SaveSlotId) {
+    const record = readSave(slot);
+    if (!record) return { ok: false, message: 'Слот пуст или сохранение повреждено.' };
+    let state = JSON.parse(JSON.stringify(record.state)) as SessionState;
+    // Completed shift reports can continue when another shift becomes available.
+    if (state.scene === 'victory' && state.shift < LATEST_SHIFT) {
+      state = newSession('newspaper', (state.shift + 1) as Shift, state.history);
+    }
+    resetRuntime();
+    restoreTimers.current = state.pendingTimers;
+    updateGame(state);
+    setNotice('Сохранение загружено');
+    return { ok: true, message: 'Сохранение загружено.' };
+  }
+  function removeSlot(slot: SaveSlotId) { const result = deleteSave(slot); refreshSlots(); return result; }
+  function measurementsComplete(state: SessionState): boolean {
+    if (state.shift < 10) return true;
+    const desk = inspectionReader.current?.().desk ?? state.inspections?.desk;
+    return !!desk?.weightMeasured && !!desk?.heightMeasured;
+  }
+  function sendGoebbelsToEasternFront() {
+    clearTimers();
+    updateGame({ scene: 'gameover', showDenyMenu: false, stamped: null, specialEnding: GOEBBELS_EASTERN_FRONT_ENDING });
+  }
+  function confrontGoebbels() {
+    const next = goebbelsConfrontation + 1;
+    if (next < 4) {
+      setGoebbelsConfrontation(next);
+      return;
+    }
+    setGoebbelsConfrontation(0);
+    playStamp();
+    sendGoebbelsToEasternFront();
+  }
+
+  function handleApprove() {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    if (!measurementsComplete(state)) { updateGame({ feedback: 'Сначала внесите в каталог рост и вес посетителя.' }); return; }
+    const visitor = visitors[state.index];
+    const isHuman = visitor.actualType === 'human';
+    const correct = isHuman && !visitor.hasInvalidDocs;
+    const missingLabel = visitor.missingDocument === 'passport' ? 'паспорта' : 'рабочей визы';
+    const feedback = !isHuman
+      ? `ОШИБКА: пропущен ${CREATURE_LABELS[visitor.actualType].toLowerCase()}. Начальство недовольно.`
+      : visitor.missingDocument
+        ? `ОШИБКА: пропущен человек без обязательного документа — нет ${missingLabel}.`
+        : visitor.hasInvalidDocs
+          ? 'ОШИБКА: пропущен человек с несоответствием профессии в рабочей визе.'
+          : 'Верно. Обычный гражданин, документы в порядке.';
+    updateGame({ stamped: 'APPROVED', errors: state.errors + (correct ? 0 : 1), feedback });
+    playStamp(); schedule(advance, 2200, 'advance');
+  }
+  function handleRefuse() {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    if (!measurementsComplete(state)) { updateGame({ feedback: 'Сначала внесите в каталог рост и вес посетителя.' }); return; }
+    const visitor = visitors[state.index];
+    if (visitor.specialOutcome === 'goebbels') { confrontGoebbels(); return; }
+    const isHuman = visitor.actualType === 'human';
+    const correct = isHuman && visitor.hasInvalidDocs;
+    const missingLabel = visitor.missingDocument === 'passport' ? 'паспорта' : 'рабочей визы';
+    const feedback = !isHuman
+      ? `ОШИБКА: нежить ушла от окна вместо вызова тревоги СД. Вид: ${CREATURE_LABELS[visitor.actualType].toLowerCase()}.`
+      : !visitor.hasInvalidDocs
+        ? 'ОШИБКА: необоснованный отказ гражданину с исправными документами.'
+        : visitor.missingDocument
+          ? `Верно. Гражданин развёрнут: нет обязательного документа — ${missingLabel}.`
+          : 'Верно. Гражданин развёрнут из-за ошибки в рабочей визе.';
+    updateGame({ stamped: 'REFUSED', errors: state.errors + (correct ? 0 : 1), feedback });
+    playStamp(); schedule(advance, 2200, 'advance');
+  }
+  function handleAlarm() {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    if (!measurementsComplete(state)) { updateGame({ feedback: 'Сначала внесите в каталог рост и вес посетителя.' }); return; }
+    updateGame({ showDenyMenu: true });
+  }
+  function selectCreature(guess: CreatureType, reasons?: import('./game/alarmReasons').AlarmEvidenceId[]) {
+    const state = gameRef.current;
+    if (pausedRef.current || state.stamped || state.scene !== 'play') return;
+    if (!measurementsComplete(state)) { updateGame({ showDenyMenu: false, feedback: 'Сначала внесите в каталог рост и вес посетителя.' }); return; }
+    const visitor = visitors[state.index];
+    if (visitor.specialOutcome === 'goebbels') { confrontGoebbels(); return; }
+    const mistakeType = visitor.actualType === 'human' || guess !== visitor.actualType;
+    const requireReasons = state.shift >= 5;
+    const missingReasons = requireReasons && (!reasons || reasons.length === 0);
+    const mistake = mistakeType || missingReasons;
+
+    let text = '';
+    if (visitor.actualType === 'human') {
+      text = 'ОШИБКА: казнён невиновный человек. Кровь на ваших руках.';
+    } else if (guess !== visitor.actualType) {
+      text = `Ошибка классификации. Это был ${CREATURE_LABELS[visitor.actualType].toLowerCase()}.`;
+    } else if (missingReasons) {
+      text = 'ОШИБКА: с пятой ночи вызов СД без подтверждённых улик наказывается трибуналом!';
+    } else {
+      text = `Точно. Угроза устранена. Вид: ${CREATURE_LABELS[visitor.actualType].toLowerCase()}.`;
+    }
+
+    updateGame({ showDenyMenu: false, stamped: 'DENIED', errors: state.errors + (mistake ? 1 : 0), feedback: text });
+    playStamp(); schedule(fireShot, 500, 'shot'); schedule(advance, 3000, 'advance');
+  }
+
+  const archive: SaveSlotsProps = {
+    slots, canSave: game.scene !== 'menu',
+    currentLabel: `${shiftLabel(game.shift)}${game.scene === 'play' ? ` · посетитель ${game.index + 1}/${visitors.length}` : ''}`,
+    onSave: saveSlot, onLoad: loadSlot, onDelete: removeSlot,
   };
-  const geometry = getFaceGeometry(gender, face.shape, morph);
-
-  const spacing = face.eyeSpacing ?? 0;
-  const eyeY = face.eyeY ?? 1.5;
-  const eyeL = { x: 150 - (15.6 + spacing / 2), y: 75 + eyeY };
-  const eyeR = { x: 150 + (15.6 + spacing / 2), y: 75 + eyeY };
-  const eyeRX = 9.2 * ((face.eyeWidth ?? 100) / 100);
-  const eyeRY = 4.6 * ((face.eyeHeight ?? 100) / 100) + 1.2;
-
-  const noseTip = face.nose === 'long' ? 98
-    : face.nose === 'hooked' ? 101
-    : face.nose === 'button' ? 91.5
-    : face.nose === 'aquiline' ? 96
-    : face.nose === 'high-bridge' ? 95.2
-    : 94.2;
-
-  const lips = face.lips;
-  const baseW = lips === 'wide' ? 13.4 : lips === 'thin-wide' ? 14.6 : lips === 'corners-down' ? 12.2 : lips === 'thin' ? 9 : lips === 'bow' ? 9.6 : lips === 'full' ? 11.6 : 10.4;
-  const baseTop = lips === 'thin' ? 1.2 : lips === 'thin-wide' ? 0.85 : lips === 'corners-down' ? 1.1 : lips === 'full' ? 3.9 : lips === 'bow' ? 4.3 : 2.7;
-  const baseBottom = lips === 'thin' ? 1.8 : lips === 'thin-wide' ? 1.5 : lips === 'corners-down' ? 2.1 : lips === 'full' ? 4.6 : 3.2;
-  const fullness = (face.lipFullness ?? 100) / 100;
-  const mouthY = 104 + (face.lipY ?? 0);
-  const upper = baseTop * fullness * ((face.upperFullness ?? 100) / 100);
-  const lower = baseBottom * fullness * ((face.lowerFullness ?? 100) / 100);
-  const gap = Math.min(1, Math.max(0, (face.lipOpenness ?? 0) / 100)) * 4.6;
-  const mouthHalfW = baseW * ((face.lipWidth ?? 100) / 100);
-  const mouthTop = mouthY - upper - 1.2;
-  const mouthBottom = mouthY + lower * 1.4 + gap + 1.6;
-
-  const chinY = 76 + (geometry.chinY - 76) / geometry.featureScaleY;
-
-  const ctxBase = {
-    skin,
-    iris: face.iris,
-    face,
-    eyeL,
-    eyeR,
-    eyeRX,
-    eyeRY,
-    noseTip,
-    mouthY,
-    mouthHalfW,
-    mouthTop,
-    mouthBottom,
-    chinY,
-    templeHalf: geometry.temple / geometry.featureScaleX,
-    idPrefix: clipId,
-    sheen: `url(#${clipId}-sheen)`,
-  };
+  const totalErrors = game.history.reduce((total, result) => total + result.errors, 0);
 
   return (
-    <g data-prosthetics>
-      <defs>
-        <clipPath id={clipId}>
-          <path d={geometry.path} transform={geometry.inverseFeatureTransform} />
-        </clipPath>
-        <linearGradient id={`${clipId}-sheen`} x1="0" y1="0" x2="0.85" y2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity={0.42} />
-          <stop offset="0.38" stopColor="#ffffff" stopOpacity={0.08} />
-          <stop offset="0.62" stopColor="#3a332b" stopOpacity={0.12} />
-          <stop offset="1" stopColor="#241f1a" stopOpacity={0.3} />
-        </linearGradient>
-      </defs>
-      {entries.map(([prostheticId, value]) => {
-        const option = FACE_PROSTHETICS.find((p) => p.id === prostheticId);
-        if (!option) return null;
-        const opacity = Math.max(0, Math.min(100, value)) / 100;
-        const art = option.art({ ...ctxBase, side: -1 });
-        if (!art) return null;
-        return (
-          <g key={prostheticId} data-prosthetic={prostheticId} opacity={opacity}>
-            {option.clipToFace ? <g clipPath={`url(#${clipId})`}>{art}</g> : art}
-          </g>
-        );
-      })}
-    </g>
+    <div className={`grain vignette app-shell${game.flash ? ' blood-flash' : ''}${paused || savesOpen ? ' is-paused' : ''}`} onPointerDownCapture={enableAudio} onClickCapture={(event) => {
+      enableAudio();
+      const target = event.target;
+      if (target instanceof Element && target.closest('button.metal-btn:not(:disabled)')) playButtonClick();
+    }} onKeyDownCapture={enableAudio}>
+      <header className="app-header">
+        <span className="app-header__caption">{game.scene === 'play' ? `${shiftLabel(game.shift).toUpperCase()} · ПОСТ OSTMARK-3` : 'DAS GRENZAMT · 1943'}</span>
+        <button className="metal-btn pause-toggle" onClick={() => changePause(true)} aria-label="Открыть паузу, сохранения и настройки" aria-haspopup="dialog" aria-expanded={paused} aria-controls="pause-menu" title="Пауза (Esc)">
+          <svg width="13" height="15" viewBox="0 0 13 15" fill="none" aria-hidden="true"><rect x="1" y="1" width="3" height="13" fill="currentColor" /><rect x="9" y="1" width="3" height="13" fill="currentColor" /></svg>ПАУЗА
+        </button>
+      </header>
+      <div className="scene-content" inert={paused || savesOpen} aria-hidden={paused || savesOpen ? true : undefined}>
+        {game.scene === 'menu' && (
+          <Menu
+            onStart={startNewGame}
+            onSelectShift={startAtShift}
+            onSaves={() => { refreshSlots(); setSavesOpen(true); }}
+          />
+        )}
+        {game.scene === 'intro' && <Intro onNext={() => updateGame({ scene: 'briefing' })} />}
+        {game.scene === 'briefing' && <Briefing onNext={() => updateGame({ scene: 'newspaper' })} />}
+        {game.scene === 'newspaper' && <Newspaper day={game.shift} onContinue={() => updateGame({ scene: 'play' })} />}
+        {game.scene === 'play' && current && (
+          <GameScreen key={`${loadEpoch}-${game.shift}-${current.id}`} shift={game.shift} visitor={current} total={visitors.length} errors={game.errors}
+            tool={game.tool} setTool={(tool) => updateGame({ tool })} paused={paused || savesOpen} stamped={game.stamped}
+            onApprove={handleApprove} onRefuse={handleRefuse} onAlarm={handleAlarm} showDenyMenu={game.showDenyMenu} onCloseDeny={() => updateGame({ showDenyMenu: false })}
+            onSelectCreature={selectCreature} feedback={game.feedback} processed={game.processed} initial={game.inspections} registerSnapshot={registerSnapshot}
+            goebbelsConfrontationStep={current.specialOutcome === 'goebbels' ? goebbelsConfrontation : 0} />
+        )}
+        {game.scene === 'gameover' && <EndScreen title="ОТСТРАНЁН ОТ СЛУЖБЫ" text={game.specialEnding ?? `Третья ошибка. ${shiftLabel(game.shift)} окончена для вас. Можно загрузить ручное или последнее автосохранение.`} onRetry={startNewGame} onSaves={() => { refreshSlots(); setSavesOpen(true); }} />}
+        {game.scene === 'victory' && (
+          <EndScreen title="СМЕНА ЗАВЕРШЕНА"
+            text={`${shiftLabel(game.shift)} завершена. Ошибок за эту смену: ${game.errors}; за пройденные смены: ${totalErrors}. Это не конец службы. Сейчас доступны смены 1–${LATEST_SHIFT}. Можно выбрать другую смену или открыть сохранение.`}
+            onRetry={startNewGame} onMainMenu={goToMenu}
+            onSaves={() => { refreshSlots(); setSavesOpen(true); }} />
+        )}
+      </div>
+      {paused && <PauseMenu settings={audioSettings} inShift={game.scene === 'play'} archive={archive} onVolume={(channel, value) => setAudioSettings(setAudioVolume(channel, value))} onResume={() => changePause(false)} onMainMenu={game.scene === 'menu' ? undefined : goToMenu} />}
+      {savesOpen && <SaveMenu archive={archive} onClose={() => setSavesOpen(false)} />}
+      {notice && <div className="session-toast" role="status">{notice}</div>}
+    </div>
   );
-});
+}

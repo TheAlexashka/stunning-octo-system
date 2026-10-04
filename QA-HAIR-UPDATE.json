@@ -1,0 +1,283 @@
+{
+  "requestNumbering": "female gallery before deletion (28 styles)",
+  "removedOriginalNumbers": [
+    2,
+    3,
+    4,
+    5,
+    9
+  ],
+  "materialOriginalNumbers": [
+    6,
+    7,
+    8,
+    13,
+    14
+  ],
+  "materialCurrentNumbers": [
+    2,
+    3,
+    4,
+    8,
+    9
+  ],
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "pixelIdenticalUnaffectedCases": 419,
+  "renderingAndGeneration": {
+    "removedFemaleIDs": [
+      "softPerm",
+      "marcelWaves",
+      "sideWaves",
+      "shoulderWaves",
+      "frenchTwist"
+    ],
+    "restyledFemaleIDs": [
+      "rolledFringe",
+      "napeChignon",
+      "crownBun",
+      "halfUp",
+      "sideSweep"
+    ],
+    "sourceLindenRetained": 13,
+    "totalHair": {
+      "male": 29,
+      "female": 23,
+      "unique": 52
+    },
+    "headwearUnchanged": {
+      "male": 6,
+      "female": 11,
+      "unique": 16
+    },
+    "totalAppearanceItems": 68,
+    "portraitCases": 479,
+    "withAccessories": 427,
+    "materialChecks": 427,
+    "paletteChecks": 108,
+    "restorationPixelChecks": 52,
+    "distinctLindenVariants": 13,
+    "headShapeCases": 90,
+    "pupilOcclusionFailures": 0,
+    "pixelIdenticalProtectedCases": 419,
+    "unchangedNonHairVisitorRecords": 1000,
+    "maleHairUnchanged": true,
+    "visitorChecks": 5000,
+    "pureChecks": [
+      {
+        "name": "13 selected variants: WAVE 3 + WAVE2 10",
+        "passed": true
+      },
+      {
+        "name": "all permanent IDs unique and hair-only",
+        "passed": true
+      },
+      {
+        "name": "both teddy-bob and sculpted-sleek variants retained",
+        "passed": true
+      },
+      {
+        "name": "front and back artwork for every variant",
+        "passed": true
+      },
+      {
+        "name": "finite static contours and local transforms",
+        "passed": true
+      },
+      {
+        "name": "curl generator finite at every extreme",
+        "passed": true
+      },
+      {
+        "name": "double mirroring restores the curl",
+        "passed": true
+      },
+      {
+        "name": "curl generation deterministic",
+        "passed": true
+      },
+      {
+        "name": "both version labels explicit",
+        "passed": true
+      },
+      {
+        "name": "unselected hairstyles are not registered",
+        "passed": true
+      }
+    ],
+    "coverage": {
+      "hair": [
+        "halfUp",
+        "braidedCrown",
+        "diagonalWave",
+        "hair-m3040-cap-combat",
+        "hair-poster-1939-pompadour",
+        "hair-poster-1938-teddy-bob",
+        "hair-m3040-center-part-flat",
+        "hair-m3040-close-crop",
+        "hair-poster-1939-wedge-bob",
+        "sideSweep",
+        "highPartStubble",
+        "fallingLock",
+        "rolledFringe",
+        "hair-poster-1938-doll-pomp",
+        "hair-m3040-himmler-flat",
+        "hair-poster-1938-tea-waves",
+        "hair-poster-1937-shell-curls",
+        "hair-m3040-tousled-waves",
+        "hair-m3040-patent-slick",
+        "milkmaidBraids",
+        "standingWave",
+        "hatShort",
+        "hair-poster-1940-sculpted-sleek",
+        "hair-poster-1938-twin-waves",
+        "hair-m3040-forward-fringe",
+        "hair-m3040-receding-thin",
+        "hair-poster-1940-sculpted-sleek-wave",
+        "shortSculpted",
+        "longFringeStubble",
+        "fallenLock",
+        "napeChignon",
+        "highSlickBack",
+        "hair-m3040-youth-undercut",
+        "hair-poster-1937-side-part-roll",
+        "hair-m3040-blond-quiff",
+        "twinBraids",
+        "hair-m3040-pomp-side-part",
+        "hair-m3040-youth-side-part",
+        "hair-poster-1936-marcel",
+        "hair-m3040-brush-crop",
+        "hair-poster-1938-teddy-bob-wave",
+        "curlyTop",
+        "hair-m3040-heydrich-part",
+        "hair-poster-1936-finger-waves",
+        "hair-m3040-clipped-sides-slick",
+        "hair-m3040-curly-quiff",
+        "flatPartReceding",
+        "hair-m3040-forelock-tumble",
+        "crownBun",
+        "hair-m3040-cap-1943",
+        "sculptedCurls",
+        "hair-m3040-dense-wave-part"
+      ],
+      "headwear": [
+        "trilby",
+        "workCap",
+        "flatCap",
+        "snood",
+        "headgear-poster-1938-snood-cord",
+        "headgear-poster-acc-aviator-goggles",
+        "fedora",
+        "headscarf",
+        "headgear-poster-1938-snood-ribbon",
+        "headgear-poster-1937-self-tied-turban",
+        "headband",
+        "veiledHat",
+        "kerchief",
+        "mourningVeil",
+        "homburg",
+        "headgear-poster-1938-snood-chenille"
+      ],
+      "accessoryVisitors": 1637,
+      "shiftSizes": [
+        8,
+        9,
+        10,
+        10,
+        11,
+        12
+      ],
+      "femaleWaveInCampaign": 15
+    },
+    "errors": []
+  },
+  "shapePreservation": {
+    "retainedShapes": 5,
+    "unchangedMainContours": 10,
+    "unchangedFringeRollContour": true,
+    "deletedRenderersAndCatalogueEntries": 5
+  },
+  "interfaceAndGameplay": {
+    "femaleOptions": 23,
+    "addedOptions": 13,
+    "bothDuplicateVersionsVisible": true,
+    "removedOptionsAbsent": true,
+    "fiveNativeLindenMaterials": true,
+    "noImportedEditor": true,
+    "independentSelections": true,
+    "mobileOverflow": {
+      "width": 374,
+      "body": false
+    },
+    "escapeSafe": true,
+    "allSixShifts": [
+      {
+        "shift": 1,
+        "hair": "halfUp",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 2,
+        "hair": "hatShort",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 3,
+        "hair": "hair-poster-1938-tea-waves",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 4,
+        "hair": "hair-m3040-clipped-sides-slick",
+        "headwear": "flatCap",
+        "same": true
+      },
+      {
+        "shift": 5,
+        "hair": "milkmaidBraids",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 6,
+        "hair": "hair-m3040-cap-combat",
+        "headwear": "none",
+        "same": true
+      }
+    ],
+    "realCampaignVariants": {
+      "wave2": {
+        "shift": 1,
+        "index": 4,
+        "hair": "hair-poster-1939-pompadour",
+        "headwear": null
+      }
+    },
+    "saveTestVisitor": {
+      "shift": 1,
+      "index": 4,
+      "hair": "hair-poster-1939-pompadour",
+      "headwear": null
+    },
+    "passportAndWindowMatch": true,
+    "manualSaveAndLoad": true,
+    "v1SaveCompatible": true,
+    "duplicateIds": 0,
+    "errors": []
+  },
+  "standalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "all13Variants": true,
+    "femaleOptions": 23,
+    "removedOptionsAbsent": true,
+    "allFiveMaterials": true,
+    "independentHeadwear": true,
+    "restyledGamePortraitAndPassport": true,
+    "v1LocalFileSave": true,
+    "errors": []
+  }
+}

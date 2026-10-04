@@ -1,0 +1,103 @@
+{
+  "request": "Remove AI raster images; replace bottle with pure SVG; remove hint; preserve original creature descriptions with newspaper-only appendices below",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "rasterAssetsRemaining": 0,
+  "vectorArtComponent": "src/components/BelladonnaBottle.tsx",
+  "interfaceChecks": {
+    "plainVectorBottleInNewspaper": true,
+    "plainVectorBottleInBag": true,
+    "bitmapImageRemoved": true,
+    "removedHintAbsent": true,
+    "originalBaseDescriptionsForAllShifts": true,
+    "doppelgangerColoredNameLeftDescriptionRight": true,
+    "twoColumnsDesktopAndMobile": true,
+    "newspaperDirectivesExact": true,
+    "appendicesOnlyBelowAndAfterRelevantNight": true,
+    "saveSchemaV1": true,
+    "bagEvidenceUnchanged": true,
+    "phaseResults": [
+      {
+        "shift": 1,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": []
+      },
+      {
+        "shift": 2,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": [
+          2
+        ]
+      },
+      {
+        "shift": 3,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": [
+          2,
+          3
+        ]
+      },
+      {
+        "shift": 4,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": [
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "shift": 5,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": [
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "shift": 6,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "shift": 7,
+        "baseDescriptionsUnchanged": true,
+        "twoColumnAllEntries": true,
+        "additions": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "standalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "inlineSVGBottleInBothLocations": true,
+    "noRasterImgOrImageElements": true,
+    "uniqueAndResolvedSVGIds": true,
+    "removedHintAbsent": true,
+    "notebookTwoColumnColoredDoppelganger": true,
+    "newspaperAddendaBelow": true,
+    "errors": []
+  }
+}

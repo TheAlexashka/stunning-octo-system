@@ -1,0 +1,184 @@
+{
+  "sourceBundle": "LINDEN_DRESS_CAMELIA_AGENT.md",
+  "userSelection": "23 clothing items only; exclude all four separate accessories",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "upperHeadPixelIdenticalCases": 479,
+  "upperHeadPixelRegion": [
+    0,
+    0,
+    200,
+    170
+  ],
+  "renderingAndGeneration": {
+    "clothingItems": 23,
+    "accessoriesImported": 0,
+    "hair": {
+      "male": 29,
+      "female": 23
+    },
+    "headwearUnique": 16,
+    "appearanceItems": 91,
+    "legacyHeadCases": 479,
+    "storyRecordsUnchanged": 1000,
+    "clothingHairAndHatCases": 782,
+    "materialIndependenceChecks": 782,
+    "fullLengthCases": 23,
+    "nativeFemaleFaceCases": 115,
+    "eyePositionCases": 36,
+    "defaultIrisCentreY": 106.8,
+    "windowIrisCentreY": 108.2,
+    "legacyShoulderScale": 1.18,
+    "femaleClothingShoulderScale": 1.25,
+    "visitorChecks": 5000,
+    "coverage": {
+      "clothes": [
+        "cloth-1932-terracotta-ensemble",
+        "cloth-1934-satin-bolero",
+        "cloth-1932-tiered-flounce",
+        "cloth-1931-tweed-suit",
+        "cloth-1936-floral-chiffon",
+        "cloth-1938-sculpted-sheath",
+        "cloth-1936-burgundy-wool",
+        "cloth-1933-batwing-coat",
+        "cloth-1937-pink-garden",
+        "cloth-1931-blue-stole",
+        "cloth-1937-contrast-tailored",
+        "cloth-1935-cobalt-day",
+        "cloth-1937-palazzo-trousers",
+        "cloth-1932-terracotta-open",
+        "cloth-1931-green-wrap",
+        "cloth-1933-nautical-jumper",
+        "cloth-1938-uberfrau-uniform",
+        "cloth-1938-polka-puffs",
+        "cloth-1932-plaid-bias",
+        "cloth-1935-peplum-dinner",
+        "cloth-1934-satin-evening",
+        "cloth-1939-royal-floral",
+        "cloth-1934-mint-tea"
+      ],
+      "hairCount": 52,
+      "headwearCount": 16,
+      "female": 2501
+    },
+    "errors": []
+  },
+  "interfaceAndGameplay": {
+    "clothingOptions": 23,
+    "legacyOption": true,
+    "accessoryOptions": 0,
+    "fullLengthView": true,
+    "independentHairHeadwearClothing": true,
+    "maleCannotWearFemaleClothing": true,
+    "noImportedEditor": true,
+    "mobile": {
+      "width": 374,
+      "horizontalOverflow": false
+    },
+    "shiftChecks": [
+      {
+        "shift": 1,
+        "clothes": "cloth-1932-terracotta-ensemble",
+        "photoClothes": "cloth-1932-terracotta-ensemble",
+        "windowIris": [
+          108.2,
+          108.2
+        ],
+        "photoIris": [
+          106.8,
+          106.8
+        ],
+        "hairSame": true,
+        "headwearSame": true
+      },
+      {
+        "shift": 2,
+        "clothes": "legacy",
+        "photoClothes": "legacy",
+        "windowIris": [
+          108.2,
+          108.2
+        ],
+        "photoIris": [
+          106.8,
+          106.8
+        ],
+        "hairSame": true,
+        "headwearSame": true
+      },
+      {
+        "shift": 3,
+        "clothes": "cloth-1937-palazzo-trousers",
+        "photoClothes": "cloth-1937-palazzo-trousers",
+        "windowIris": [
+          108.2,
+          108.2
+        ],
+        "photoIris": [
+          106.8,
+          106.8
+        ],
+        "hairSame": true,
+        "headwearSame": true
+      },
+      {
+        "shift": 4,
+        "clothes": "legacy",
+        "photoClothes": "legacy",
+        "windowIris": [
+          108.2,
+          108.2
+        ],
+        "photoIris": [
+          106.8,
+          106.8
+        ],
+        "hairSame": true,
+        "headwearSame": true
+      },
+      {
+        "shift": 5,
+        "clothes": "cloth-1937-palazzo-trousers",
+        "photoClothes": "cloth-1937-palazzo-trousers",
+        "windowIris": [
+          108.2,
+          108.2
+        ],
+        "photoIris": [
+          106.8,
+          106.8
+        ],
+        "hairSame": true,
+        "headwearSame": true
+      },
+      {
+        "shift": 6,
+        "clothes": "legacy",
+        "photoClothes": "legacy",
+        "windowIris": [
+          108.2,
+          108.2
+        ],
+        "photoIris": [
+          106.8,
+          106.8
+        ],
+        "hairSame": true,
+        "headwearSame": true
+      }
+    ],
+    "manualSaveAndLoad": true,
+    "v1SaveCompatible": true,
+    "errors": []
+  },
+  "standalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "clothingItems": 23,
+    "fullLengthPreview": true,
+    "clothingInWindowAndPassport": true,
+    "windowOnlyIrisShift": true,
+    "localFileV1Save": true,
+    "errors": []
+  }
+}

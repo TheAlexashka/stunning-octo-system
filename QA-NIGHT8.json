@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-02",
+  "scope": "Meerleute redesign + Nixen + Night 8",
+  "generator": {
+    "labelsRenamed": true,
+    "shift8": {
+      "visitors": 14
+    },
+    "merleuteRedesign": true,
+    "humanYellowSclera20pct": true,
+    "nixDesign": true,
+    "stats": {
+      "humanYellow": 3981,
+      "nixBlue": 13542,
+      "merMasked": 10012
+    }
+  },
+  "ui": {
+    "shiftPicker8": true,
+    "newspaper8NixWoodcut": true,
+    "notebook": {
+      "meerleute": true,
+      "nixen": true,
+      "doppelgaenger": true,
+      "entries6": true,
+      "addenda2to8": true
+    },
+    "merleute": {
+      "horizontalPupil": true,
+      "yellowSclera": true,
+      "sharkTeethPolygons": true,
+      "saltCrystalsAndObservation": true,
+      "pearlyNailsAndQuestion": true
+    },
+    "nixen": {
+      "greenTeethMale": true,
+      "algaeFemaleWithGlovesFlow": true,
+      "droplets": true
+    },
+    "humanPlainNails": true,
+    "alarm": {
+      "nixAndNewEvidenceAt8": true,
+      "hiddenAt7": true
+    },
+    "errorSweepShifts1to8": true,
+    "mobile": true,
+    "pageErrors": []
+  },
+  "saveCompatibility": {
+    "oldV1WithoutNailBag": "loads cleanly, no runtime errors"
+  },
+  "runtimeErrorSweep": {
+    "shifts": "1..8",
+    "tools": "eye/teeth/nails/skin/breath/bag",
+    "pageErrors": []
+  },
+  "bugsFoundAndFixed": [
+    "старые extras breathResult у морских посетителей ночей 4-6 перезаписывали новый солёный выдох — удалены",
+    "у обоих морских посетителей ночи 8 был профиль отказа от пробы дыхания — ids заменены на 730/754, соль наблюдаема в игре",
+    "фильтр улик тревоги был хардкодом и показывал улики Nixen с ночи 1 — переведён на minShift из данных",
+    "улика «капли на стекле» теперь только с ночи 8 (раньше с 4, т.к. старые морские давали капли)",
+    "после снятия перчаток вопрос о перламутре/тине не появлялся — добавлен переход к диалогу вопроса",
+    "в тревоге чекбоксы считались вместе с книжкой — проверки ограничены диалогом"
+  ],
+  "renames": {
+    "mermaid": "Meerleute",
+    "doppelganger": "Doppelgänger",
+    "nix": "Nixen"
+  },
+  "night8": {
+    "date": "19 октября 1943",
+    "visitors": 14
+  },
+  "build": {
+    "singleFile": "dist/index.html",
+    "noRasterImages": true
+  }
+}

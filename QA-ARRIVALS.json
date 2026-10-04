@@ -1,0 +1,260 @@
+{
+  "request": "Uniform human-size window irises; common Russian non-revealing arrival phrases",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "pixelIdenticalUnchangedPortraits": 479,
+  "renderingAndGeneration": {
+    "arrivalBankTemplates": 16,
+    "arrivalTextsInRussian": true,
+    "neutralSharedBankAcrossAllSixTypes": true,
+    "accessoryOverridesRemoved": true,
+    "idTypeEqualityChecks": 5000,
+    "forcedTypeVisitorChecks": 30000,
+    "nonDialogueRegressionRecords": 6000,
+    "spokenLanguageChecks": 36000,
+    "changedSpokenJobAndCityNamesOnly": true,
+    "campaignVisitors": 60,
+    "legacySpeechMigration": {
+      "legacySnapshots": 144,
+      "nonArrivalUnchanged": true
+    },
+    "unchangedAppearanceCases": 479,
+    "eyeCases": 72,
+    "windowIris": {
+      "scale": 0.72,
+      "offsetY": -0.8,
+      "cy": 108.2,
+      "outerRadius": 3.744,
+      "innerRadius": 3.06
+    },
+    "passportUnchanged": {
+      "scale": 1,
+      "offsetY": -2.2,
+      "cy": 106.8
+    },
+    "examples": [
+      {
+        "type": "human",
+        "quote": "Здравствуйте. Здесь проходят проверку документов?"
+      },
+      {
+        "type": "human",
+        "quote": "Пожалуйста, скажите, с чего начать проверку."
+      },
+      {
+        "type": "vampire",
+        "quote": "Здравствуйте. Теперь моя очередь?"
+      },
+      {
+        "type": "human",
+        "quote": "Пожалуйста, скажите, с чего начать проверку."
+      },
+      {
+        "type": "werewolf",
+        "quote": "Здравствуйте. Теперь моя очередь?"
+      },
+      {
+        "type": "human",
+        "quote": "Паспорт и разрешение при мне. Куда их положить?"
+      },
+      {
+        "type": "mermaid",
+        "quote": "Буду ждать ваших указаний."
+      },
+      {
+        "type": "ghoul",
+        "quote": "Здравствуйте. Теперь моя очередь?"
+      }
+    ],
+    "errors": []
+  },
+  "interfaceAndGameplay": {
+    "realTypesChecked": 6,
+    "allWindowIrisSizesEqual": true,
+    "allWindowIrisPositionsEqual": true,
+    "passportUnchanged": true,
+    "russianNeutralArrivalForAllTypes": true,
+    "inspectionIrisUnchanged": true,
+    "legacySpoilerAndGermanGreetingMigrated": true,
+    "manualSaveAndLoad": true,
+    "v1Schema": true,
+    "mobileHorizontalOverflow": false,
+    "results": [
+      {
+        "type": "human",
+        "quote": "Здравствуйте. Здесь проходят проверку документов?",
+        "windowEyes": [
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          },
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          }
+        ],
+        "passportEyes": [
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          },
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          }
+        ]
+      },
+      {
+        "type": "vampire",
+        "quote": "Здравствуйте. Теперь моя очередь?",
+        "windowEyes": [
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          },
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          }
+        ],
+        "passportEyes": [
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          },
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          }
+        ]
+      },
+      {
+        "type": "werewolf",
+        "quote": "Здравствуйте. Теперь моя очередь?",
+        "windowEyes": [
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          },
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          }
+        ],
+        "passportEyes": [
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          },
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          }
+        ]
+      },
+      {
+        "type": "mermaid",
+        "quote": "Буду ждать ваших указаний.",
+        "windowEyes": [
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          },
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          }
+        ],
+        "passportEyes": [
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          },
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          }
+        ]
+      },
+      {
+        "type": "ghoul",
+        "quote": "Здравствуйте. Теперь моя очередь?",
+        "windowEyes": [
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          },
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          }
+        ],
+        "passportEyes": [
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          },
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          }
+        ]
+      },
+      {
+        "type": "doppelganger",
+        "quote": "Пожалуйста, скажите, с чего начать проверку.",
+        "windowEyes": [
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          },
+          {
+            "cy": 108.2,
+            "outer": 3.7439999999999998,
+            "inner": 3.06
+          }
+        ],
+        "passportEyes": [
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          },
+          {
+            "cy": 106.8,
+            "outer": 5.2
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "standalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "realTypesChecked": [
+      "human",
+      "vampire",
+      "werewolf",
+      "mermaid",
+      "ghoul",
+      "doppelganger"
+    ],
+    "uniformWindowIris": true,
+    "russianNeutralOpenings": true,
+    "legacyGreetingMigration": true,
+    "passportIrisUnchanged": true,
+    "localFileSaveV1": true,
+    "errors": []
+  }
+}

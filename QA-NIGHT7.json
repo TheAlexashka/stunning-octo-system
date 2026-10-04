@@ -1,0 +1,237 @@
+{
+  "request": "Night 7: 50% ordinary eyes for werewolf/ghoul/mermaid; 50% drops conditional on ordinary eyes; bag inspection and bottle artwork",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "generatedArtwork": "src/assets/belladonna-drops.png",
+  "checks": {
+    "oldShift1to6RegressionVisitors": 4320,
+    "oldCampaignUnchanged": 60,
+    "night7Visitors": 13,
+    "probabilityChecks": 120000,
+    "maskChance": 0.5,
+    "dropsConditionalChance": 0.5,
+    "onlyThreeSpecies": true,
+    "roundNormalHumanEyesWhenMasked": true,
+    "deterministicAcrossReload": true,
+    "stats": {
+      "human": {
+        "masked": 0,
+        "drops": 0,
+        "total": 20000
+      },
+      "vampire": {
+        "masked": 0,
+        "drops": 0,
+        "total": 20000
+      },
+      "werewolf": {
+        "masked": 10012,
+        "drops": 5015,
+        "total": 20000
+      },
+      "mermaid": {
+        "masked": 10012,
+        "drops": 5015,
+        "total": 20000
+      },
+      "ghoul": {
+        "masked": 10012,
+        "drops": 5015,
+        "total": 20000
+      },
+      "doppelganger": {
+        "masked": 0,
+        "drops": 0,
+        "total": 20000
+      }
+    },
+    "night7": [
+      {
+        "index": 0,
+        "id": 601,
+        "type": "human",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#3a2a18",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 1,
+        "id": 602,
+        "type": "werewolf",
+        "masked": true,
+        "drops": true,
+        "eyeColor": "#4a6a30",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 2,
+        "id": 603,
+        "type": "ghoul",
+        "masked": true,
+        "drops": false,
+        "eyeColor": "#5a4020",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 3,
+        "id": 604,
+        "type": "mermaid",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#2a8090",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 4,
+        "id": 605,
+        "type": "human",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#3a2a18",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 5,
+        "id": 606,
+        "type": "werewolf",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#a06018",
+        "eyeShape": "slit"
+      },
+      {
+        "index": 6,
+        "id": 607,
+        "type": "vampire",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#a02020",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 7,
+        "id": 608,
+        "type": "mermaid",
+        "masked": true,
+        "drops": false,
+        "eyeColor": "#6a8a90",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 8,
+        "id": 609,
+        "type": "ghoul",
+        "masked": true,
+        "drops": true,
+        "eyeColor": "#3a5a80",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 9,
+        "id": 610,
+        "type": "human",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#4a6a30",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 10,
+        "id": 611,
+        "type": "doppelganger",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#5a4020",
+        "eyeShape": "normal"
+      },
+      {
+        "index": 11,
+        "id": 612,
+        "type": "werewolf",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#a06018",
+        "eyeShape": "slit"
+      },
+      {
+        "index": 12,
+        "id": 613,
+        "type": "human",
+        "masked": false,
+        "drops": false,
+        "eyeColor": "#5a4020",
+        "eyeShape": "normal"
+      }
+    ]
+  },
+  "interface": {
+    "night7InPicker": true,
+    "seventhNewspaper": true,
+    "bottleArtLoaded": true,
+    "bagActionAfter7Only": true,
+    "contentsHiddenBeforeConsent": true,
+    "maskedWithDropsAndWithoutDropsTested": true,
+    "ordinaryBagTested": true,
+    "evidenceNotebook": true,
+    "evidenceAlarmAfter7Only": true,
+    "manualSaveAndLoad": true,
+    "v1BackCompatible": {
+      "oldV1": true,
+      "rejectEarlyBag": true,
+      "rejectBadBag": true
+    },
+    "sixthVictoryContinuesToSeventh": true,
+    "mobileNoHorizontalOverflow": true,
+    "checked": [
+      {
+        "index": 0,
+        "id": 601,
+        "type": "human",
+        "masked": false,
+        "drops": false
+      },
+      {
+        "index": 1,
+        "id": 602,
+        "type": "werewolf",
+        "masked": true,
+        "drops": true
+      },
+      {
+        "index": 2,
+        "id": 603,
+        "type": "ghoul",
+        "masked": true,
+        "drops": false
+      },
+      {
+        "index": 5,
+        "id": 606,
+        "type": "werewolf",
+        "masked": false,
+        "drops": false
+      }
+    ],
+    "errors": []
+  },
+  "fullShiftAndPausedSave": {
+    "fullNight7Played": true,
+    "visitorsProcessed": 13,
+    "errorsInShift": 0,
+    "night7AutoSave": true,
+    "pendingBagSaved": true,
+    "pendingBagRestored": true,
+    "errors": []
+  },
+  "standalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "night7Accessible": true,
+    "generatedArtLoadedInNewspaperAndBag": true,
+    "bagItemsHiddenUntilConsent": true,
+    "bagInspectionAndEvidence": true,
+    "localV1Save": true,
+    "errors": []
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "round": 4,
+  "date": "2026-10-02",
+  "checks": {
+    "uberfrauExcludedFromRandom": true,
+    "uberfrauStillAssignableManually": true,
+    "uberfrauStillListedInGalleryClothing": true,
+    "femalePosterHairstylesAdded": 15,
+    "femalePosterHairstylesNote": "hair-poster-1938-doll-pomp («Помпадур Schiaparelli») уже была в женском каталоге прошлой волны; дубль убран — клонирование при переключении вкладок исчезло",
+    "malePosterHairstylesFromMdAdded": false,
+    "maleHeadwearFromMdAdded": false,
+    "maleLindenIdsVerifiedAgainstRegistry": true,
+    "maleLindenAll19RenderWithHairPaths": true,
+    "counts": {
+      "maleHair": 29,
+      "femaleHair": 38,
+      "maleHeadwear": 6,
+      "femaleHeadwear": 11,
+      "femaleClothing": 24
+    },
+    "noDuplicateCatalogIds": true,
+    "randomVisitorRenderSweepShifts1to8": {
+      "visitors": 87,
+      "failures": 0,
+      "baldLinden": 0
+    },
+    "gallerySweepAllOptionsNoPageErrors": true,
+    "tscNoEmit": true,
+    "build": "dist/index.html updated",
+    "stubbleGameNativeRewrite": true,
+    "stubbleNote": "HeadStubble снова делегирует MenScalp: геометрия головы сэмплируется с реального контура лица (sampleHeadPath), стерня только у дизайнов со scalp-спекой, в координатах головы",
+    "stubbleRestoredFirstMigrationPipeline": true,
+    "braidedCoilsReservedFromRandom": true,
+    "braidedCoilsSpecialWhiteSwatch": true,
+    "lindenHeadwearIdsFixed": "снуды и гогглы переведены на актуальные id пакета (snood-cord/ribbon/chenille, acc-aviator-goggles); тюрбан не тронут",
+    "gogglesReservedFromRandom": true,
+    "carbuncleAddedGalleryOnly": true,
+    "carbuncleNote": "взято только acc-poster-carbuncle (forehead-gem) из LINDEN_GEM_AGENT.md; рендерер уже был в пакете poster1930, подключён в каталог уборов обоих полов, из рандома исключён"
+  }
+}

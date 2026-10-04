@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-02",
+  "scope": "Правки после ночи 8: руки Meerleute, газета, скрытие Nixen, кристаллы",
+  "fixes": [
+    "перламутровые ногти съезжали с пальцев на кисти с перепонками (контур не совпадал с массивом пальцев) — нарисован собственный контур webbedOutline",
+    "ноготь большого пальца не красился — добавлены перламутр/тина/грязь и блик",
+    "NIXEN показывались в стартовом определителе нежити — убраны, остаются только с ночи 8 (книжка/газета/тревога)",
+    "газета ночи 8 переписана: убраны уточнения признаков Meerleute, выпуск целиком про Nixen; гравюра без кристаллов и подписи MEERLEUTE",
+    "крупные пятиугольные кристаллы с белой обводкой на стекле заменены тонким инеем: плёнка + мелкие ромбы с бликами",
+    "фразы «капли с этой ночи означают реку, а не море» и «капли с этой ночи — след Nixen» убраны из газеты и описаний: капли всегда означали реку",
+    "под кристаллами соли были два полупрозрачных четырёхугольника — заменены общей дымкой конденсата, как у других результатов дыхания",
+    "ладонь кисти с перепонками снизу сужена к запястью — рука вмещается в рукав/манжету"
+  ],
+  "checks": {
+    "briefingNoNixen": true,
+    "briefingKeepsMeerleute": true,
+    "notebookGating": {
+      "nixAt8": true,
+      "hiddenAt1": true
+    },
+    "newspaper8": {
+      "woodcutNixOnly": true,
+      "noMeerleuteClarifications": true
+    },
+    "merleute": {
+      "pearlNailsPerHandInclThumb": 5,
+      "saltGrainsOnGlass": ">=20",
+      "thumbPearl": true
+    },
+    "nixen": {
+      "algaePathsPerHandInclThumb": 5,
+      "greenTeeth": true,
+      "droplets": true
+    },
+    "alarmGating": {
+      "nixAndEvidenceAt8": true,
+      "hiddenAt7": true
+    },
+    "errorSweepShifts1to8": true,
+    "pageErrors": [],
+    "phrasesRemoved": true,
+    "hazeInsteadOfSquares": true,
+    "handsFitSleeve": true
+  }
+}

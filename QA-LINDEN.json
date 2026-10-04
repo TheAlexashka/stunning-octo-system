@@ -1,0 +1,184 @@
+{
+  "collection": "Linden integration into Das Grenzamt",
+  "sourceBundle": "LINDEN_CUSTOM_AGENT.md",
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "legacyRegression": {
+    "pixelIdenticalCases": 165,
+    "changedCases": 0,
+    "unchangedNonHairVisitorRecords": 1000
+  },
+  "renderingAndGeneration": {
+    "selectedItems": 24,
+    "newMaleHair": 19,
+    "newHeadwear": 5,
+    "totalHair": 44,
+    "uniqueHeadwear": 16,
+    "combinations": 383,
+    "withAccessories": 339,
+    "materialChecks": 339,
+    "paletteChecks": 114,
+    "removalRestoresIdenticalPixels": 44,
+    "geometryChecks": 600,
+    "visitors": 5000,
+    "coverage": {
+      "seenHair": [
+        "shoulderWaves",
+        "sideWaves",
+        "diagonalWave",
+        "hair-m3040-cap-combat",
+        "sideSweep",
+        "twinBraids",
+        "hair-m3040-center-part-flat",
+        "hair-m3040-close-crop",
+        "crownBun",
+        "rolledFringe",
+        "highPartStubble",
+        "fallingLock",
+        "softPerm",
+        "shortSculpted",
+        "hair-m3040-himmler-flat",
+        "braidedCrown",
+        "hair-m3040-tousled-waves",
+        "hair-m3040-patent-slick",
+        "standingWave",
+        "hatShort",
+        "halfUp",
+        "hair-m3040-forward-fringe",
+        "hair-m3040-receding-thin",
+        "frenchTwist",
+        "napeChignon",
+        "longFringeStubble",
+        "fallenLock",
+        "highSlickBack",
+        "hair-m3040-youth-undercut",
+        "milkmaidBraids",
+        "hair-m3040-blond-quiff",
+        "hair-m3040-pomp-side-part",
+        "hair-m3040-youth-side-part",
+        "hair-m3040-brush-crop",
+        "marcelWaves",
+        "curlyTop",
+        "sculptedCurls",
+        "hair-m3040-heydrich-part",
+        "hair-m3040-clipped-sides-slick",
+        "hair-m3040-curly-quiff",
+        "flatPartReceding",
+        "hair-m3040-forelock-tumble",
+        "hair-m3040-cap-1943",
+        "hair-m3040-dense-wave-part"
+      ],
+      "seenHeadwear": [
+        "trilby",
+        "workCap",
+        "flatCap",
+        "snood",
+        "headgear-poster-1938-snood-cord",
+        "headgear-poster-acc-aviator-goggles",
+        "fedora",
+        "headscarf",
+        "headgear-poster-1938-snood-ribbon",
+        "headgear-poster-1937-self-tied-turban",
+        "headband",
+        "veiledHat",
+        "kerchief",
+        "mourningVeil",
+        "homburg",
+        "headgear-poster-1938-snood-chenille"
+      ],
+      "accessoryVisitors": 1637,
+      "shifts": [
+        8,
+        9,
+        10,
+        10,
+        11,
+        12
+      ],
+      "campaignNewHair": 20,
+      "campaignNewHeadwear": 2
+    },
+    "errors": []
+  },
+  "interfaceAndGameplay": {
+    "gallery": {
+      "maleHair": 29,
+      "femaleHair": 15,
+      "maleHeadwear": 6,
+      "femaleHeadwear": 11,
+      "addedHeadwearTested": 5,
+      "noImportedEditor": true,
+      "mobileOverflow": {
+        "width": 374,
+        "body": false
+      },
+      "escapeDoesNotOpenPause": true
+    },
+    "shiftChecks": [
+      {
+        "shift": 1,
+        "hair": "shoulderWaves",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 2,
+        "hair": "hatShort",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 3,
+        "hair": "twinBraids",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 4,
+        "hair": "hair-m3040-clipped-sides-slick",
+        "headwear": "flatCap",
+        "same": true
+      },
+      {
+        "shift": 5,
+        "hair": "sideWaves",
+        "headwear": "none",
+        "same": true
+      },
+      {
+        "shift": 6,
+        "hair": "hair-m3040-cap-combat",
+        "headwear": "none",
+        "same": true
+      }
+    ],
+    "actualCampaignAddedItems": {
+      "scalp": {
+        "shift": 1,
+        "index": 3,
+        "hair": "hair-m3040-cap-combat",
+        "headwear": "workCap"
+      },
+      "headwear": {
+        "shift": 2,
+        "index": 4,
+        "hair": "hair-m3040-receding-thin",
+        "headwear": "headgear-poster-acc-aviator-goggles"
+      }
+    },
+    "passportAndWindowMatch": true,
+    "manualSaveAndLoad": true,
+    "v1SaveCompatible": true,
+    "duplicatePortraitIds": 0,
+    "errors": []
+  },
+  "standalone": {
+    "standaloneHTML": true,
+    "networkRequests": 0,
+    "allFiveAddedAccessories": true,
+    "newHairAndScalp": true,
+    "gameAndPassport": true,
+    "localFileManualSave": true,
+    "errors": []
+  }
+}

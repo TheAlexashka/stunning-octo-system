@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-02",
+  "scope": "Night 9, human scale-pattern skin, missing documents, expanded dialogue",
+  "checks": {
+    "typescript": "pass",
+    "production_build": "pass",
+    "shift_routing": "pass: shifts 1-9 generate visitors",
+    "night9_roster": "pass: 15 visitors",
+    "human_scale_patterns": "pass: 4 deterministic Night 9 humans in the roster have the scale-like pattern",
+    "missing_documents": "pass: the generated chance is exactly 20% for a human to miss one document; passport and work-visa cases are supported from Night 1 onward without forced Night 9 overrides",
+    "missing_document_refusal": "pass: App.tsx treats missing passport or work visa as invalid documents",
+    "missing_document_desk": "pass: tray and desk hide the forgotten document without an explicit warning; the player can notice the gap and ask about the document set",
+    "scale_dialogue": "pass: humans and Meerleute have separate multi-variant eczema replies; the question is phrased as a normal skin-health question without asking whether the visitor is Meerleute",
+    "human_eczema_color": "pass: human scale-like eczema uses a dark flesh-brown pattern color; marine blue remains reserved for Meerleute",
+    "missing_document_dialogue": "pass: missing-document replies use conversational, human explanations rather than bureaucratic template language",
+    "mismatch_dialogue": "pass: occupation mismatch banks expanded beyond the previous 11-variant limit",
+    "newspaper": "pass: issue 9 is registered and attributes worsening water quality to enemy activity",
+    "artwork_preservation": "pass: Night 8's Nix woodcut remains unchanged; Night 9 now has its own inline water-quality woodcut"
+  },
+  "artifacts": [
+    "/home/user/das-grenzamt.html",
+    "/home/user/das-grenzamt-source.zip"
+  ]
+}

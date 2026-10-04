@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-02",
+  "scope": "Night 9 artwork replacement and complete Night 10 rebuild",
+  "checks": {
+    "typescript": "pass",
+    "production_build": "pass",
+    "shift_selection": "pass: Night 10 is listed and is reachable as the latest shift",
+    "shift_routing": "pass: shifts 1-10 generate visitors",
+    "night10_roster": "pass: new 15-visitor order; visitor three is always Пауль Йозеф Геббельс",
+    "goebbels_documents": "pass: passport and work visa are matching and present; passport photo explicitly uses the updated Goebbels portrait variant and full name Пауль Йозеф Геббельс",
+    "goebbels_appearance": "pass: eyes enlarged to scale 1.16 while retaining half-closed upper lids at lid aperture 0.58; wide nose tip and nostrils; brows lowered to the eye line with explicit brow tilt 0 and straight eye tilt 0; brown eyes, dark-brown hair, hairstyle 14, mouth wrinkles, no moustache, thin reception-window lips, clothing 29, Gauleiter cap",
+    "goebbels_measurements": "pass: weight 45 kg and height 165 cm; weight and height at the other clerk are required before stamp or SD; one-brow reaction is animated",
+    "goebbels_voice": "pass: m9 rebuilt as a human-like voiced male timbre with gentle pitch movement, longer overlapping pulses, new speech quote and two-brow animation without stage-direction text",
+    "goebbels_dialogues": "pass: new gloves, flashlight, skin, sclera, eye-shape, teeth, breath and bag lines; first objection followed by compliance on the second request",
+    "goebbels_brow_animation": "pass: CSS eyebrow raise animation visibly lifts both brows for voice and one brow for measurements; no stage-direction text",
+    "goebbels_breath": "pass: ordinary fogged-glass trace plus alcohol smell",
+    "goebbels_bag": "pass: four individually drawn party objects: badge, directive, armband and identity cards; each uses the same geometric emblem as the uniform, with no star shapes",
+    "goebbels_confrontation": "pass: refuse or fire clicks 1-3 trigger anger, calming attempt and fatigue dialogue with raised-brow animation; click 4 plays stamp sound and opens the Eastern Front ending",
+    "goebbels_ending": "pass: refusal or any liquidation route to 'Вместо выстрела в журнале появилась одна строка: «Клерк отправлен на Восточный фронт». Вас увезли до рассвета.'",
+    "night10_newspaper": "pass: front reports, undead stories, imminent total-mobilization chief, and mandatory catalogue entries without advice",
+    "night9_artwork": "pass: completely redrawn water-only woodcut; no person, hand or eczema mark"
+  },
+  "artifacts": [
+    "/home/user/das-grenzamt.html",
+    "/home/user/das-grenzamt-source.zip"
+  ]
+}

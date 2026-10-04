@@ -1,0 +1,27 @@
+export const ALARM_EVIDENCE_LIST = [
+  { id: 'second_jaw', label: 'Вторая челюсть в глубине рта за зубами', minShift: 5 },
+  { id: 'fangs', label: 'Удлинённые хищные клыки' },
+  { id: 'claws', label: 'Чёрные звериные когти вместо ногтей' },
+  { id: 'webbing', label: 'Перепонки между пальцами рук' },
+  { id: 'dirt_nails', label: 'Трупная грязь под краями обычных ногтей' },
+  { id: 'slit_pupil', label: 'Узкие вертикальные зрачки' },
+  { id: 'horizontal_pupil', label: 'Горизонтальные зрачки, как у осьминога' },
+  { id: 'red_iris', label: 'Кроваво-красная неестественная радужка' },
+  { id: 'yellow_sclera', label: 'Желтоватые белки глаз' },
+  { id: 'scales', label: 'Чешуйчатый узор и синеватый отлив кожи (проверить экзему)' },
+  { id: 'pearly_nails', label: 'Перламутровый блеск ногтей, как у раковины' },
+  { id: 'shark_teeth', label: 'Мелкие острые зубы в несколько рядов' },
+  { id: 'no_grey_55', label: 'Возраст ≥ 55 лет без седины и морщин (Blutsauger)' },
+  { id: 'dry_breath', label: 'Ледяной выдох без конденсата на стекле', minShift: 4 },
+  { id: 'droplets_breath', label: 'Мокрый речной выдох с каплями на стекле', minShift: 8 },
+  { id: 'salt_breath', label: 'Белёсый солёный налёт с кристаллами на стекле', minShift: 4 },
+  { id: 'smooth_hairless', label: 'Абсолютно гладкая кожа без единого волоска', minShift: 5 },
+  { id: 'extra_finger', label: 'Лишний палец на руке или перчатке (6 пальцев)', minShift: 5 },
+  { id: 'multi_pupil', label: 'Несколько зрачков в одном глазу (поликория)', minShift: 5 },
+  { id: 'no_light_reaction', label: 'Зрачок не реагирует на свет фонарика (неподвижен)', minShift: 6 },
+  { id: 'belladonna_drops', label: 'Капли Belladonna Augentropfen обнаружены в сумке', minShift: 7 },
+  { id: 'green_teeth', label: 'Зеленоватые зубы (речные мужчины, Nixen)', minShift: 8 },
+  { id: 'river_algae_nails', label: 'Тина под ногтями (речные женщины, Nixen)', minShift: 8 },
+] as const;
+
+export type AlarmEvidenceId = (typeof ALARM_EVIDENCE_LIST)[number]['id'];
